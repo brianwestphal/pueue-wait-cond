@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "hotsheet-channel-pueue-wait-cond": {
+      "command": "npx",
+      "args": [
+        "tsx",
+        "/Users/westphal/Documents/hotsheet/src/channel.ts",
+        "--data-dir",
+        "/Users/westphal/Documents/pueue-wait-cond/.hotsheet"
+      ]
+    }
+  }
+}
