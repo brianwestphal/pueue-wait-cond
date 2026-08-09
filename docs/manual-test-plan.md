@@ -72,8 +72,19 @@ Automated coverage runs on macOS only.
 
 - **Linux:** run the full suite (`npm test`). Watch for `/bin/sh` differences in
   condition resolution and for `pueue_directory` isolation in `TestDaemon`.
-- **Windows:** currently **unsupported** (POSIX shell default, POSIX signals).
-  Confirm the failure mode is a clear error, not a hang.
+- **Windows:** **not supported, by decision** (HS-6). `package.json` declares
+  `"os": ["darwin", "linux"]`. The check here is only that the *refusal* is
+  clean: on a Windows box, `npm install pueue-wait-cond` must fail immediately
+  with `EBADPLATFORM` and name the supported platforms — it must not install
+  and then fail at the first condition. See
+  [requirements/05-packaging.md](requirements/05-packaging.md) R5.2.1.
+
+  **This one genuinely needs a Windows machine.** `npm install --os=win32` does
+  *not* simulate it: that flag exists to let you fetch optional dependencies
+  *for* another platform, so it relaxes the check rather than tightening it, and
+  the install succeeds. Enforcement was verified indirectly instead, by
+  installing a package declaring `"os": ["aix"]` on macOS — npm exits `1` with
+  `EBADPLATFORM` and installs nothing, which is the mechanism this relies on.
 
 ## M7 — Publish dry-run
 

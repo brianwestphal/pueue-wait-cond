@@ -24,6 +24,11 @@ npx pueue-wait-cond --help
 Requires **Node.js ≥ 20** and a `pueue` binary on `$PATH` (point elsewhere with
 `--pueue-binary` or `$PUEUE_BINARY`). No runtime dependencies.
 
+**macOS and Linux only.** Windows is not supported — conditions run through
+`/bin/sh` and the tool relies on POSIX signals — so `package.json` declares
+`"os": ["darwin", "linux"]` and `npm install` refuses up front rather than
+failing later at the first condition.
+
 ## Usage
 
 ```

@@ -1,6 +1,6 @@
 {
   "name": "pueue-wait-cond",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "pueue wait with timeouts and --until / --while script conditions",
   "keywords": [
     "pueue",
@@ -25,6 +25,10 @@
   "engines": {
     "node": ">=20.0.0"
   },
+  "os": [
+    "darwin",
+    "linux"
+  ],
   "bin": {
     "pueue-wait-cond": "bin/pueue-wait-cond.js"
   },

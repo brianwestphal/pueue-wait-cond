@@ -23,6 +23,28 @@ crowded prefix), `pueue-until` (undersells `--while` and `--timeout`).
   dependency tree behind it.
 - A `pueue` binary, found via `--pueue-binary`, `$PUEUE_BINARY`, or `$PATH`.
 
+## R5.2.1 — Supported platforms: macOS and Linux only
+
+`package.json` declares `"os": ["darwin", "linux"]`. **Windows is deliberately
+not supported**, and that is a product decision, not an oversight.
+
+Two things bake POSIX in:
+
+1. `--shell` defaults to `/bin/sh`. Every inline condition and every
+   non-executable script goes through it, and that path does not exist on
+   Windows — conditions would fail with exit `6`.
+2. Signal handling: `main()` traps SIGINT/SIGTERM and `runCondition` escalates
+   SIGTERM → SIGKILL. Windows semantics differ.
+
+The `os` field makes `npm install` fail up front with `EBADPLATFORM` rather than
+letting the tool install cleanly and then misbehave at the first condition. A
+loud install-time failure is the honest outcome for a platform nobody is
+testing.
+
+Reopening this would mean shelling to `cmd.exe`/PowerShell, changing the `-c`
+flag, and replacing `resolveCommand`'s executable-bit check with something
+meaningful on Windows — see the closed Hot Sheet ticket HS-6.
+
 ## R5.3 — Published contents
 
 `files` ships `bin/`, `dist/src/`, `README.md` and `LICENSE` — sources, tests

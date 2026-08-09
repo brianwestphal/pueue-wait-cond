@@ -13,7 +13,7 @@ Status markers: **Shipped** · **Partial** · **Design only** · **Deferred**
 | [02-wait-semantics.md](requirements/02-wait-semantics.md) | Polling, selection, status matching | **Shipped** |
 | [03-conditions.md](requirements/03-conditions.md) | `--until` / `--while` | **Shipped** |
 | [04-output-and-exit-codes.md](requirements/04-output-and-exit-codes.md) | Streams, format, exit codes | **Shipped** |
-| [05-packaging.md](requirements/05-packaging.md) | npm package, build, checks | **Partial** — built and packable, **not published** |
+| [05-packaging.md](requirements/05-packaging.md) | npm package, build, checks | **Shipped** — published to npm as `pueue-wait-cond` |
 
 ## By requirement
 
@@ -72,8 +72,9 @@ Status markers: **Shipped** · **Partial** · **Design only** · **Deferred**
 
 | Req | Summary | Status |
 | --- | --- | --- |
-| R5.1 | npm package `pueue-wait-cond`, MIT, ESM, one binary | **Partial** — the package is complete and packable, but has **never been published**, and the name's availability on the npm registry has not been verified |
+| R5.1 | npm package `pueue-wait-cond`, MIT, ESM, one binary | **Shipped** — published; `0.1.0` is the current `latest` |
 | R5.2 | Node ≥ 20, zero runtime deps | Shipped |
+| R5.2.1 | macOS + Linux only; `os` field makes Windows `npm install` fail loudly | Shipped |
 | R5.3 | `files` allowlist + `prepack` build | Shipped |
 | R5.4 | Typed programmatic API via `src/index.ts` | Shipped |
 | R5.5 | build / typecheck / lint / test / coverage scripts | Shipped |
@@ -95,8 +96,14 @@ Every requirement above has both unit and E2E coverage, except:
 
 Tracked as Hot Sheet tickets:
 
-- Not published to npm; registry name availability unverified.
+- **Published `0.1.0` is missing its own metadata.** It went to npm before the
+  `repository` / `bugs` / `homepage` / `author` / `os` fields were added, so the
+  npm page has no repo links and does not refuse Windows installs. A `0.1.1`
+  release is needed to carry them.
 - No CI workflow.
 - No `--json` machine-readable result output.
 - No option to fail fast on an unknown task id (today: warn and keep waiting).
-- Windows is unsupported and untested (`/bin/sh` default, POSIX signals).
+
+Closed by decision, not by implementation:
+
+- **Windows support** — declined (HS-6). See R5.2.1.
