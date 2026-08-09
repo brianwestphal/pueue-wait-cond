@@ -409,7 +409,13 @@ npm run typecheck
 The E2E suite starts its **own** `pueued` in a temp directory with its own
 socket and state, so it never touches your daemon. If `pueue`/`pueued` aren't
 installed those tests **skip silently** — see [Installing pueue](#installing-pueue)
-if you want them to actually run.
+if you want them to actually run, or set `PWC_REQUIRE_PUEUE=1` to turn the skip
+into a failure.
+
+CI (`.github/workflows/ci.yml`) runs lint, typecheck and both suites on
+**ubuntu + macOS × Node 20 and 22**, plus a merged coverage job. It installs
+pueue from prebuilt release binaries via `.github/scripts/install-pueue.sh` and
+sets `PWC_REQUIRE_PUEUE=1`, so a failed install can't masquerade as a green run.
 
 See [`docs/`](docs/) for the requirements documents and the codebase map.
 

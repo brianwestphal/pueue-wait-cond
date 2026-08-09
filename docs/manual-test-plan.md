@@ -68,10 +68,12 @@ the lock file mid-run instead yields exit `4` promptly.
 
 ## M6 — Cross-platform
 
-Automated coverage runs on macOS only.
+CI covers Linux and macOS; this section is what CI cannot reach.
 
-- **Linux:** run the full suite (`npm test`). Watch for `/bin/sh` differences in
-  condition resolution and for `pueue_directory` isolation in `TestDaemon`.
+- **Linux:** now covered by CI (`.github/workflows/ci.yml`, ubuntu-latest ×
+  Node 20/22) with `PWC_REQUIRE_PUEUE=1`, so the real-daemon suite cannot skip
+  silently. Only worth doing by hand when chasing a distro-specific `/bin/sh`
+  difference CI's Ubuntu image would not show.
 - **Windows:** **not supported, by decision** (HS-6). `package.json` declares
   `"os": ["darwin", "linux"]`. The check here is only that the *refusal* is
   clean: on a Windows box, `npm install pueue-wait-cond` must fail immediately
@@ -106,3 +108,5 @@ Previously-manual checks now covered automatically:
 | Condition SIGTERM → SIGKILL escalation | `test/unit/condition.test.ts` |
 | Colour gating logic (not the rendering) | `test/unit/reporter.test.ts` |
 | Large `pueue status --json` payloads (~8 MB) | `test/unit/pueue.test.ts` |
+| Linux, and Node 20 vs 22 | CI matrix (`.github/workflows/ci.yml`) |
+| "did the E2E suite actually run?" | `PWC_REQUIRE_PUEUE=1` precondition test |

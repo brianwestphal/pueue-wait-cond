@@ -10,7 +10,7 @@ import { join } from 'node:path';
 import { after, before, describe, it } from 'node:test';
 
 import { EXIT } from '../../src/exitCodes.js';
-import { HAS_PUEUE, makeTempDir, runCli, TestDaemon, writeScript } from '../helpers/e2e.js';
+import { HAS_PUEUE, makeTempDir, REQUIRE_PUEUE, runCli, TestDaemon, writeScript } from '../helpers/e2e.js';
 
 let daemon: TestDaemon;
 let dir: string;
@@ -27,7 +27,23 @@ after(async () => {
   rmSync(dir, { recursive: true, force: true });
 });
 
-const skip = HAS_PUEUE ? false : 'pueue/pueued are not installed';
+const skip = HAS_PUEUE ? false : 'pueue/pueued are not installed (set PWC_REQUIRE_PUEUE=1 to fail instead)';
+
+describe('e2e (real daemon): preconditions', () => {
+  it('finds pueue when the environment demands it', () => {
+    if (!REQUIRE_PUEUE) {
+      assert.equal(typeof HAS_PUEUE, 'boolean');
+      return;
+    }
+    assert.ok(
+      HAS_PUEUE,
+      'PWC_REQUIRE_PUEUE is set but pueue/pueued are not on $PATH. ' +
+        'The real-daemon suite would have skipped silently, producing a green ' +
+        'but empty run. Install pueue (.github/scripts/install-pueue.sh) or ' +
+        'unset PWC_REQUIRE_PUEUE.',
+    );
+  });
+});
 
 describe('e2e (real daemon): basic waiting', { skip }, () => {
   it('waits for a single task to finish', async () => {

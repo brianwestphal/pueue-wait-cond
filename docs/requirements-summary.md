@@ -92,6 +92,10 @@ uncovered residue is defensive guards that cannot be reached through the public
 surface (rethrow arms for errors the callee never raises, a best-effort temp-dir
 cleanup `catch`).
 
+CI (`.github/workflows/ci.yml`) runs both suites on ubuntu + macOS against Node
+20 and 22, with `PWC_REQUIRE_PUEUE=1` so a missing pueue fails rather than
+skips.
+
 Every requirement above has both unit and E2E coverage, except:
 
 - **R2.9 (signals)** — covered by unit tests (in-process `process.emit`) and E2E
@@ -106,7 +110,6 @@ Tracked as Hot Sheet tickets:
   `repository` / `bugs` / `homepage` / `author` / `os` fields were added, so the
   npm page has no repo links and does not refuse Windows installs. A `0.1.1`
   release is needed to carry them.
-- No CI workflow.
 
 Closed by decision, not by implementation:
 

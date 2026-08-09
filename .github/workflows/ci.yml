@@ -1,0 +1,89 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  gates:
+    name: lint + typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      # Catches a broken build before the matrix spends time on it.
+      - run: npm run build
+
+  test:
+    name: test (${{ matrix.os }}, node ${{ matrix.node }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # Linux has never been exercised outside CI, and /bin/sh differences in
+        # condition resolution are the likeliest source of surprises.
+        os: [ubuntu-latest, macos-latest]
+        node: [20, 22]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+
+      - name: Install pueue
+        run: .github/scripts/install-pueue.sh
+
+      - name: Confirm pueue is usable
+        run: |
+          pueue --version
+          pueued --version
+
+      - run: npm run test:unit
+
+      # PWC_REQUIRE_PUEUE turns a missing pueue into a failure instead of a
+      # silent skip — without it, a botched install would produce a green run
+      # in which the entire real-daemon suite quietly did nothing.
+      - name: E2E (stub + real daemon)
+        run: npm run test:e2e
+        env:
+          PWC_REQUIRE_PUEUE: '1'
+
+  coverage:
+    name: coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Install pueue
+        run: .github/scripts/install-pueue.sh
+      - name: Merged unit + E2E coverage
+        run: npm run coverage
+        env:
+          PWC_REQUIRE_PUEUE: '1'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage
+          path: coverage/
+          retention-days: 14

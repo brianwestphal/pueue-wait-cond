@@ -87,6 +87,16 @@ function which(binary: string): boolean {
 
 export const HAS_PUEUE = which('pueue') && which('pueued');
 
+/**
+ * Set `PWC_REQUIRE_PUEUE=1` to turn a missing pueue into a **failure** instead
+ * of a silent skip.
+ *
+ * CI sets it. Without it, a runner that failed to install pueue would produce a
+ * green run in which the entire real-daemon suite quietly did nothing — the
+ * worst kind of passing build.
+ */
+export const REQUIRE_PUEUE = (process.env.PWC_REQUIRE_PUEUE ?? '') !== '';
+
 /** An isolated pueue daemon: its own directory, socket, state and config. */
 export class TestDaemon {
   readonly dir: string;
