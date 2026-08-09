@@ -21,13 +21,90 @@ npm install -g pueue-wait-cond
 npx pueue-wait-cond --help
 ```
 
-Requires **Node.js ≥ 20** and a `pueue` binary on `$PATH` (point elsewhere with
-`--pueue-binary` or `$PUEUE_BINARY`). No runtime dependencies.
+Requires **Node.js ≥ 20** and **pueue** (see below). No runtime dependencies.
 
 **macOS and Linux only.** Windows is not supported — conditions run through
 `/bin/sh` and the tool relies on POSIX signals — so `package.json` declares
 `"os": ["darwin", "linux"]` and `npm install` refuses up front rather than
 failing later at the first condition.
+
+## Installing pueue
+
+[pueue](https://github.com/Nukesor/pueue) is a shell task queue: you hand it
+long-running commands, it runs them in the background, and you query or wait on
+them later. It is not in most default distro repos, so it usually needs
+installing explicitly. `pueue-wait-cond` is useless without it.
+
+It ships **two** binaries and you need both:
+
+| Binary | Role |
+| --- | --- |
+| `pueued` | the daemon — actually runs your tasks |
+| `pueue` | the client — what `pueue-wait-cond` shells out to |
+
+### macOS
+
+```sh
+brew install pueue
+brew services start pueue        # start now, and again at login
+```
+
+If you'd rather not run it as a background service, start the daemon by hand
+instead: `pueued -d`.
+
+### Linux
+
+The upstream project recommends your system package manager first, since distro
+packages also drop in the service files and shell completions. Coverage varies a
+lot by distro — check the
+[repology table](https://repology.org/project/pueue/versions) for yours.
+
+Otherwise, either build it:
+
+```sh
+cargo install --locked pueue     # installs to ~/.cargo/bin
+```
+
+…or grab the prebuilt binaries (Linux incl. ARM, macOS) from the
+[releases page](https://github.com/Nukesor/pueue/releases) — download both
+`pueue` and `pueued`, rename them if the asset names carry a target suffix, and
+put them on your `$PATH`.
+
+Then start the daemon. Package installs ship a systemd **user** unit:
+
+```sh
+systemctl --user enable --now pueued.service
+```
+
+For a cargo or tarball install there is no unit file, so either daemonize it
+directly or [copy the unit](https://github.com/Nukesor/pueue/blob/main/utils/pueued.service)
+and fix its `ExecStart` path:
+
+```sh
+pueued -d
+```
+
+### Check it works
+
+```sh
+pueue status          # should print a task table, not a connection error
+pueue add -- 'sleep 5'
+pueue-wait-cond --timeout 30
+```
+
+If `pueue status` reports it cannot reach the daemon, `pueued` is not running —
+that is a pueue setup problem, not a `pueue-wait-cond` one. `pueue-wait-cond`
+surfaces the same error and exits `5`.
+
+### Notes
+
+- `pueue-wait-cond` only ever invokes the **client** (`pueue status --json`), so
+  strictly it needs `pueue` on `$PATH` and a daemon it can reach — the daemon
+  itself may live elsewhere. Point at a non-default binary with
+  `--pueue-binary` or `$PUEUE_BINARY`, and at a non-default daemon with
+  `--config` / `--profile`.
+- Developed and tested against **pueue 4.x**. The only coupling is that
+  `pueue status --json` exists and emits the usual `tasks` / `groups` payload.
 
 ## Usage
 
@@ -281,7 +358,8 @@ npm run typecheck
 
 The E2E suite starts its **own** `pueued` in a temp directory with its own
 socket and state, so it never touches your daemon. If `pueue`/`pueued` aren't
-installed those tests skip.
+installed those tests **skip silently** — see [Installing pueue](#installing-pueue)
+if you want them to actually run.
 
 See [`docs/`](docs/) for the requirements documents and the codebase map.
 
