@@ -69,15 +69,49 @@ on stderr, rather than spinning to the timeout.
 Nothing else counts as unreachable. A finished task could in principle be
 restarted back into `queued` or `stashed`, so those targets keep waiting.
 
-## R2.6 — Unknown task ids
+## R2.6 — Unknown task ids: a bounded grace period
 
 Naming an id the daemon has never heard of **warns once on stderr and keeps
-waiting**, rather than failing.
+waiting for `--task-grace` (default 5s)**, then gives up with exit `7`.
 
-The alternative — erroring out — would lose a real race: `pueue add` followed
-immediately by a wait can legitimately observe the daemon before the task is
-visible. The warning names the ids and points at `--timeout` so a typo does not
-hang silently forever.
+This is the compromise between two bad options. Failing immediately would lose a
+real race — `pueue add` followed straight by a wait can legitimately observe the
+daemon before the task is visible. Waiting forever (the behaviour up to 0.1.0)
+turned a typo'd id, or one `pueue clean` had removed, into a silent hang unless
+the user happened to pass `--timeout`.
+
+Five seconds is far longer than a daemon needs to register a task, and far
+shorter than a human will tolerate staring at a hung command.
+
+`--task-grace` accepts:
+
+| Value | Meaning |
+| --- | --- |
+| a duration | tolerate absence for that long (default `5`) |
+| `0` | fail on the first snapshot that lacks the id |
+| `forever` | never give up — the pre-0.1.1 behaviour |
+
+The grace is a **floor, not a deadline**: it is evaluated at poll boundaries, so
+the actual give-up time is the first poll at or after it elapses. With the
+default 2s interval a 5s grace fires at ~6s. `--task-grace 0` is exact, since
+the first poll already satisfies it.
+
+### R2.6.1 — The grace timer tracks *current* absence
+
+The timer starts when a named id is first observed missing and **resets whenever
+every named id is present again**.
+
+That single rule covers both shapes of the problem: an id that never appears
+(timer runs from the first poll) and an id that existed and then vanished
+because someone ran `pueue clean` mid-wait (timer runs from the disappearance).
+A task that flickers in and out never accumulates, which is correct — it exists,
+so the wait should continue.
+
+### R2.6.2 — Scope
+
+The grace applies **only** to explicitly named task ids. `--group` and `--all`
+select whatever the daemon currently has, so "missing" is not a meaningful state
+for them; an empty group is simply complete (R2.7).
 
 While any named id is still missing, the wait cannot report success, even if
 every id it *can* see has finished.

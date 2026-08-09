@@ -19,6 +19,8 @@ export const EXIT = {
   PUEUE_ERROR: 5,
   /** A condition script could not be executed at all (missing file, spawn failure). */
   CONDITION_ERROR: 6,
+  /** Named task ids never showed up within `--task-grace`. */
+  UNKNOWN_TASKS: 7,
   /** Interrupted by SIGINT. */
   INTERRUPTED: 130,
 } as const;
@@ -33,6 +35,7 @@ const NAMES: Record<number, string> = {
   [EXIT.CONDITION_FAILED]: 'CONDITION_FAILED',
   [EXIT.PUEUE_ERROR]: 'PUEUE_ERROR',
   [EXIT.CONDITION_ERROR]: 'CONDITION_ERROR',
+  [EXIT.UNKNOWN_TASKS]: 'UNKNOWN_TASKS',
   [EXIT.INTERRUPTED]: 'INTERRUPTED',
 };
 

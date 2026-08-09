@@ -33,6 +33,7 @@ export type WaitOutcome =
   | { kind: 'while'; value: string; exitCode: number | null }
   | { kind: 'timeout'; pendingIds: number[] }
   | { kind: 'unreachable'; tasks: TaskState[]; failed: TaskState[] }
+  | { kind: 'unknown-tasks'; ids: number[] }
   | { kind: 'interrupted' };
 
 export interface WaitDeps {
@@ -154,6 +155,12 @@ export async function waitForConditions(deps: WaitDeps): Promise<WaitOutcome> {
   let announced = false;
   let warnedMissing = false;
   let iteration = 0;
+  /**
+   * When the currently-absent ids were first seen to be absent. Reset to `null`
+   * whenever every named id is present, so the grace covers both "never showed
+   * up" and "was there, then `pueue clean` removed it".
+   */
+  let missingSince: number | null = null;
 
   try {
     for (;;) {
@@ -163,12 +170,18 @@ export async function waitForConditions(deps: WaitDeps): Promise<WaitOutcome> {
       const selected = selectTasks(snapshot, options);
 
       const absent = missingIds(snapshot, options);
-      if (absent.length > 0 && !warnedMissing) {
-        warnedMissing = true;
-        reporter.warn(
-          `warning: pueue has no task(s) ${absent.join(', ')}; ` +
-            `continuing in case they show up. Ctrl-C or use --timeout to bound the wait.`,
-        );
+      if (absent.length === 0) {
+        missingSince = null;
+      } else {
+        missingSince ??= now();
+        if (!warnedMissing) {
+          warnedMissing = true;
+          const bound =
+            options.taskGraceMs === null
+              ? 'waiting indefinitely (--task-grace forever)'
+              : `giving them ${(options.taskGraceMs / 1000).toFixed(3)}s to appear (--task-grace)`;
+          reporter.warn(`warning: pueue has no task(s) ${absent.join(', ')}; ${bound}.`);
+        }
       }
 
       if (!announced) {
@@ -190,6 +203,19 @@ export async function waitForConditions(deps: WaitDeps): Promise<WaitOutcome> {
       if (pending.length === 0 && selectionSatisfiable && absent.length === 0) {
         reporter.allReached(options.targetStatus, reached.length);
         return { kind: 'reached', tasks: reached, failed };
+      }
+
+      // 1a. Named ids that never showed up. Bounded by `--task-grace` so a typo
+      //     or an id `pueue clean` has removed fails fast, while still covering
+      //     the `pueue add` → wait race that motivated tolerating them at all.
+      if (
+        absent.length > 0 &&
+        options.taskGraceMs !== null &&
+        missingSince !== null &&
+        now() - missingSince >= options.taskGraceMs
+      ) {
+        reporter.unknownTasks(absent, options.taskGraceMs);
+        return { kind: 'unknown-tasks', ids: absent };
       }
 
       // 1b. A finished task can never become `success`/`failed` after the fact,
@@ -301,6 +327,8 @@ export function outcomeToExitCode(outcome: WaitOutcome, options: Options): numbe
       return EXIT.TIMEOUT;
     case 'unreachable':
       return EXIT.TASK_FAILURE;
+    case 'unknown-tasks':
+      return EXIT.UNKNOWN_TASKS;
     case 'interrupted':
       return EXIT.INTERRUPTED;
   }

@@ -187,6 +187,73 @@ describe('e2e: waiting', () => {
   });
 });
 
+describe('e2e: --task-grace', () => {
+  it('exits 7 when a named id never appears', async () => {
+    const binary = stubPueue('grace-missing', [tasks([{ id: 1, status: doneOk }])]);
+    const run = await runCli([
+      '--pueue-binary',
+      binary,
+      '4242',
+      '--task-grace',
+      '0.2',
+      '--interval',
+      '0.05',
+    ]);
+    assert.equal(run.code, EXIT.UNKNOWN_TASKS);
+    assert.match(run.stderr, /pueue has no task\(s\) 4242/);
+    assert.match(run.stdout, /still has no task\(s\) 4242 after 0\.200s; giving up/);
+  });
+
+  it('exits 7 immediately with --task-grace 0', async () => {
+    const binary = stubPueue('grace-zero', [tasks([{ id: 1, status: doneOk }])]);
+    const started = Date.now();
+    const run = await runCli(['--pueue-binary', binary, '99', '--task-grace', '0']);
+    assert.equal(run.code, EXIT.UNKNOWN_TASKS);
+    assert.ok(Date.now() - started < 10_000);
+  });
+
+  it('still succeeds when the task shows up inside the grace', async () => {
+    const binary = stubPueue('grace-race', [
+      tasks([]),
+      tasks([{ id: 5, status: { Running: {} } }]),
+      tasks([{ id: 5, status: doneOk }]),
+    ]);
+    const run = await runCli([
+      '--pueue-binary',
+      binary,
+      '5',
+      '--task-grace',
+      '30',
+      '--interval',
+      '0.05',
+    ]);
+    assert.equal(run.code, EXIT.OK);
+  });
+
+  it('waits past any grace with --task-grace forever', async () => {
+    const binary = stubPueue('grace-forever', [tasks([])]);
+    // The id never appears, so only --timeout can end this run.
+    const run = await runCli([
+      '--pueue-binary',
+      binary,
+      '77',
+      '--task-grace',
+      'forever',
+      '--timeout',
+      '0.4',
+      '--interval',
+      '0.05',
+    ]);
+    assert.equal(run.code, EXIT.TIMEOUT);
+  });
+
+  it('does not apply to --group selections', async () => {
+    const binary = stubPueue('grace-group', [tasks([{ id: 1, status: doneOk }])]);
+    const run = await runCli(['--pueue-binary', binary, '-g', 'default', '--task-grace', '0']);
+    assert.equal(run.code, EXIT.OK);
+  });
+});
+
 describe('e2e: --timeout', () => {
   it('exits 3 when the budget runs out', async () => {
     const binary = stubPueue('timeout', [tasks([{ id: 1, status: { Running: {} } }])]);

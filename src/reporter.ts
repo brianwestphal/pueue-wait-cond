@@ -145,6 +145,16 @@ export class Reporter {
     this.line(this.paint(`Timed out after ${(timeoutMs / 1000).toFixed(3)}s.${pending}`, RED));
   }
 
+  unknownTasks(ids: number[], graceMs: number): void {
+    this.line(
+      this.paint(
+        `pueue still has no task(s) ${ids.join(', ')} after ${(graceMs / 1000).toFixed(3)}s; ` +
+          `giving up. Use --task-grace to wait longer, or "forever" to wait indefinitely.`,
+        RED,
+      ),
+    );
+  }
+
   allReached(targetStatus: string, count: number): void {
     this.line(this.paint(`All ${count} task(s) reached "${targetStatus}"`, GREEN));
   }

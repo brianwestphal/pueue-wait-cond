@@ -44,6 +44,13 @@ describe('exitCodeName', () => {
     assert.equal(exitCodeName(EXIT.TIMEOUT), 'TIMEOUT');
     assert.equal(exitCodeName(EXIT.CONDITION_FAILED), 'CONDITION_FAILED');
     assert.equal(exitCodeName(EXIT.INTERRUPTED), 'INTERRUPTED');
+    assert.equal(exitCodeName(EXIT.UNKNOWN_TASKS), 'UNKNOWN_TASKS');
+  });
+
+  it('gives every EXIT member a distinct value and a name', () => {
+    const values = Object.values(EXIT);
+    assert.equal(new Set(values).size, values.length, 'exit codes must be unique');
+    for (const value of values) assert.doesNotMatch(exitCodeName(value), /^UNKNOWN\(/);
   });
 
   it('falls back for an unknown code', () => {

@@ -159,6 +159,31 @@ describe('parseCliArgs — timing', () => {
   });
 });
 
+describe('parseCliArgs — --task-grace', () => {
+  it('defaults to 5 seconds', () => {
+    assert.equal(opts([]).taskGraceMs, 5_000);
+  });
+
+  it('parses a duration', () => {
+    assert.equal(opts(['--task-grace', '30']).taskGraceMs, 30_000);
+    assert.equal(opts(['--task-grace', '250ms']).taskGraceMs, 250);
+  });
+
+  it('accepts zero, meaning fail on the first poll', () => {
+    assert.equal(opts(['--task-grace', '0']).taskGraceMs, 0);
+  });
+
+  it('accepts "forever", meaning never give up', () => {
+    assert.equal(opts(['--task-grace', 'forever']).taskGraceMs, null);
+    assert.equal(opts(['--task-grace', '  FOREVER  ']).taskGraceMs, null);
+  });
+
+  it('rejects nonsense', () => {
+    assert.throws(() => opts(['--task-grace', 'soon']), /--task-grace expects a duration/);
+    assert.throws(() => opts(['--task-grace', '-1']), UsageError);
+  });
+});
+
 describe('parseCliArgs — conditions', () => {
   it('defaults to no conditions', () => {
     assert.deepEqual(opts([]).until, []);

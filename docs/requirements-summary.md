@@ -37,7 +37,9 @@ Status markers: **Shipped** · **Partial** · **Design only** · **Deferred**
 | R2.3 | Selection recomputed every poll (picks up late tasks) | Shipped |
 | R2.4 | "Has reached" ordering; off-line states matched exactly | Shipped |
 | R2.5 | Unreachable `success`/`failed` targets exit `1` promptly | Shipped |
-| R2.6 | Unknown ids warn once and keep waiting | Shipped |
+| R2.6 | Unknown ids warn once, then give up after `--task-grace` (default 5s, exit `7`) | Shipped |
+| R2.6.1 | Grace timer tracks *current* absence and resets when all ids are present | Shipped |
+| R2.6.2 | Grace applies only to explicitly named ids, not `--group`/`--all` | Shipped |
 | R2.7 | Empty group/all selection completes; empty id selection does not | Shipped |
 | R2.8 | Never sleeps past the deadline | Shipped |
 | R2.9 | SIGINT/SIGTERM → exit `130`, wakes out of a sleep | Shipped |
@@ -61,7 +63,7 @@ Status markers: **Shipped** · **Partial** · **Design only** · **Deferred**
 
 | Req | Summary | Status |
 | --- | --- | --- |
-| R4.1 | Exit code table (0,1,2,3,4,5,6,130) | Shipped |
+| R4.1 | Exit code table (0,1,2,3,4,5,6,7,130) | Shipped |
 | R4.2 | Task failure does not fail the wait by default | Shipped |
 | R4.3 | `pueue wait`-compatible progress lines on stdout | Shipped |
 | R4.4 | Extra lines for conditions, timeout, completion; already-finished tasks still reported | Shipped |
@@ -102,7 +104,6 @@ Tracked as Hot Sheet tickets:
   release is needed to carry them.
 - No CI workflow.
 - No `--json` machine-readable result output.
-- No option to fail fast on an unknown task id (today: warn and keep waiting).
 
 Closed by decision, not by implementation:
 

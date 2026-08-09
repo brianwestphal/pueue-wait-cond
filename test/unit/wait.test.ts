@@ -228,6 +228,146 @@ describe('waitForConditions — primary completion', () => {
   });
 });
 
+describe('waitForConditions — --task-grace', () => {
+  const idOpts = (graceMs: number | null) => ({
+    selection: { mode: 'ids' as const, ids: [7] },
+    taskGraceMs: graceMs,
+  });
+
+  it('gives up once the grace expires', async () => {
+    const { outcome, exitCode, harness } = await runWait(
+      [makeSnapshot([])],
+      idOpts(100),
+      { nowStep: 60, quiet: false },
+    );
+    assert.equal(outcome.kind, 'unknown-tasks');
+    if (outcome.kind === 'unknown-tasks') assert.deepEqual(outcome.ids, [7]);
+    assert.equal(exitCode, EXIT.UNKNOWN_TASKS);
+    assert.match(harness.out.text, /still has no task\(s\) 7 after 0\.100s; giving up/);
+  });
+
+  it('fails on the first poll with a zero grace', async () => {
+    const { outcome, polls } = await runWait([makeSnapshot([])], idOpts(0));
+    assert.equal(outcome.kind, 'unknown-tasks');
+    assert.equal(polls, 1);
+  });
+
+  it('still covers the add-then-wait race within the grace', async () => {
+    const { outcome, polls } = await runWait(
+      [
+        makeSnapshot([]),
+        makeSnapshot([]),
+        makeSnapshot([{ id: 7, status: RUNNING }]),
+        makeSnapshot([{ id: 7, status: done() }]),
+      ],
+      idOpts(10_000),
+    );
+    assert.equal(outcome.kind, 'reached');
+    assert.equal(polls, 4);
+  });
+
+  it('waits indefinitely with a null grace', async () => {
+    const { outcome, polls } = await runWait(
+      [
+        makeSnapshot([]),
+        makeSnapshot([]),
+        makeSnapshot([]),
+        makeSnapshot([{ id: 7, status: done() }]),
+      ],
+      idOpts(null),
+      { nowStep: 100_000 },
+    );
+    assert.equal(outcome.kind, 'reached');
+    assert.equal(polls, 4);
+  });
+
+  it('never fires for group or --all selections', async () => {
+    const { outcome } = await runWait([makeSnapshot([])], {
+      selection: { mode: 'all' },
+      taskGraceMs: 0,
+    });
+    assert.equal(outcome.kind, 'reached');
+  });
+
+  it('resets the grace when the id reappears', async () => {
+    // Present → cleaned away → present again. Because the timer restarts on
+    // each reappearance, the total absent time can exceed the grace without
+    // any single gap doing so.
+    const { outcome, polls } = await runWait(
+      [
+        makeSnapshot([{ id: 7, status: RUNNING }]),
+        makeSnapshot([]),
+        makeSnapshot([{ id: 7, status: RUNNING }]),
+        makeSnapshot([]),
+        makeSnapshot([{ id: 7, status: done() }]),
+      ],
+      idOpts(150),
+      { nowStep: 50 },
+    );
+    assert.equal(outcome.kind, 'reached');
+    assert.equal(polls, 5);
+  });
+
+  it('gives up on a task that vanishes mid-wait and stays gone', async () => {
+    const { outcome, exitCode } = await runWait(
+      [
+        makeSnapshot([{ id: 7, status: RUNNING }]),
+        makeSnapshot([]),
+        makeSnapshot([]),
+        makeSnapshot([]),
+      ],
+      idOpts(100),
+      { nowStep: 60 },
+    );
+    assert.equal(outcome.kind, 'unknown-tasks');
+    assert.equal(exitCode, EXIT.UNKNOWN_TASKS);
+  });
+
+  it('reports only the ids that are actually missing', async () => {
+    const { outcome } = await runWait(
+      [makeSnapshot([{ id: 1, status: done() }])],
+      { selection: { mode: 'ids', ids: [1, 2, 3] }, taskGraceMs: 0 },
+    );
+    assert.equal(outcome.kind, 'unknown-tasks');
+    if (outcome.kind === 'unknown-tasks') assert.deepEqual(outcome.ids, [2, 3]);
+  });
+
+  it('warns once, naming the grace', async () => {
+    const { harness } = await runWait(
+      [makeSnapshot([]), makeSnapshot([]), makeSnapshot([{ id: 7, status: done() }])],
+      idOpts(10_000),
+      { quiet: false },
+    );
+    assert.equal(harness.err.text.match(/has no task/g)?.length, 1);
+    assert.match(harness.err.text, /giving them 10\.000s to appear \(--task-grace\)/);
+  });
+
+  it('says so when the grace is forever', async () => {
+    const { harness } = await runWait(
+      [makeSnapshot([]), makeSnapshot([{ id: 7, status: done() }])],
+      idOpts(null),
+      { quiet: false },
+    );
+    assert.match(harness.err.text, /waiting indefinitely \(--task-grace forever\)/);
+  });
+
+  it('treats the grace as a floor, firing on the first poll at or past it', async () => {
+    // Evaluated at poll boundaries, so a 100ms grace with a clock that advances
+    // 60ms per read cannot fire on the first poll.
+    const { outcome, polls } = await runWait([makeSnapshot([])], idOpts(100), { nowStep: 60 });
+    assert.equal(outcome.kind, 'unknown-tasks');
+    assert.ok(polls > 1, 'should not have given up before the grace elapsed');
+  });
+
+  it('loses to completion when the last missing id arrives already done', async () => {
+    const { outcome } = await runWait(
+      [makeSnapshot([{ id: 7, status: done() }])],
+      idOpts(0),
+    );
+    assert.equal(outcome.kind, 'reached');
+  });
+});
+
 describe('waitForConditions — --status targets', () => {
   it('stops as soon as tasks start running', async () => {
     const { outcome, polls } = await runWait(
@@ -700,6 +840,7 @@ describe('outcomeToExitCode', () => {
     assert.equal(outcomeToExitCode({ kind: 'while', value: 'x', exitCode: 1 }, options), EXIT.CONDITION_FAILED);
     assert.equal(outcomeToExitCode({ kind: 'timeout', pendingIds: [1] }, options), EXIT.TIMEOUT);
     assert.equal(outcomeToExitCode({ kind: 'unreachable', tasks: [], failed: [] }, options), EXIT.TASK_FAILURE);
+    assert.equal(outcomeToExitCode({ kind: 'unknown-tasks', ids: [1] }, options), EXIT.UNKNOWN_TASKS);
     assert.equal(outcomeToExitCode({ kind: 'interrupted' }, options), EXIT.INTERRUPTED);
   });
 });

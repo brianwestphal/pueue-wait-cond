@@ -221,6 +221,7 @@ outgrows a line or two.
 | --- | --- |
 | `-t, --timeout <SECONDS>` | Give up after this long (default: never) |
 | `-i, --interval <SECONDS>` | Poll period (default `2`) |
+| `--task-grace <SECONDS\|forever>` | How long a named task id may be missing from pueue before giving up with exit `7` (default `5`) |
 
 Durations are seconds by default; `ms` / `s` / `m` / `h` suffixes also work
 (`--timeout 5m`).
@@ -288,6 +289,7 @@ payload is huge and routinely holds secrets.
 | `4` | A `--while` condition failed |
 | `5` | pueue could not be reached or its output not understood |
 | `6` | A condition script could not be executed at all |
+| `7` | Named task ids never appeared within `--task-grace` |
 | `130` | Interrupted (SIGINT/SIGTERM) |
 
 A condition that *cannot run* (missing file, bad `--shell`) is exit `6`, never
@@ -340,9 +342,10 @@ pueue-wait-cond -a --until ./healthy.sh --until ./cancelled.sh --timeout 120
   `--condition-timeout`, `--fail-on-error`, `--pueue-binary`, `--shell`.
 - `--status` accepts a **superset** of pueue's values (`stashed`, `paused`,
   `locked`, `failed` in addition to `queued`, `running`, `success`, `done`).
-- Waiting on a task id the daemon has never heard of **warns and keeps waiting**
-  (so `pueue add` immediately followed by a wait isn't a race) instead of
-  failing. Bound it with `--timeout`.
+- Waiting on a task id the daemon has never heard of **warns and keeps waiting
+  for `--task-grace` (5s), then exits `7`** — long enough that `pueue add`
+  immediately followed by a wait isn't a race, short enough that a typo doesn't
+  hang. `--task-grace forever` restores the indefinite wait.
 - Exit codes are meaningful; `pueue wait` returns `0` almost regardless.
 
 ## Development

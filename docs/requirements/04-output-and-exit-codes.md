@@ -16,6 +16,7 @@ Related: [01-cli-surface.md](01-cli-surface.md) · [02-wait-semantics.md](02-wai
 | `4` | `CONDITION_FAILED` | A `--while` condition exited non-zero |
 | `5` | `PUEUE_ERROR` | pueue could not be reached, or its output not understood |
 | `6` | `CONDITION_ERROR` | A condition script could not be executed at all |
+| `7` | `UNKNOWN_TASKS` | Named task ids never appeared within `--task-grace` (R2.6) |
 | `130` | `INTERRUPTED` | SIGINT / SIGTERM |
 
 Scripts branch on these, so any change is a breaking change.

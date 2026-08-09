@@ -20,6 +20,11 @@ export interface Options {
   intervalMs: number;
   /** Per-invocation budget for a condition script, in ms. */
   conditionTimeoutMs: number;
+  /**
+   * How long a named task id may be absent from pueue before the wait gives up.
+   * `null` means tolerate it forever (the pre-0.1.1 behaviour).
+   */
+  taskGraceMs: number | null;
   until: string[];
   while: string[];
   /** Exit non-zero when the wait completes but some task did not succeed. */
@@ -122,6 +127,11 @@ Each takes either a SCRIPT path or an inline shell COMMAND — see below:
 Timing:
   -t, --timeout <SECONDS>  Give up after this long [default: no timeout]
   -i, --interval <SECONDS> Poll period [default: 2]
+      --task-grace <SECONDS|forever>
+                           How long a named TASK_ID may be missing from pueue
+                           before giving up with exit ${7} [default: 5].
+                           Covers the "pueue add" then wait race; "0" fails on
+                           the first poll, "forever" never gives up.
 
 pueue plumbing:
       --pueue-binary <PATH>  pueue executable [default: $PUEUE_BINARY or "pueue"]
@@ -170,6 +180,7 @@ Exit codes:
   4  a --while condition failed
   5  pueue could not be reached or understood
   6  a condition script could not be executed
+  7  named task ids never appeared (see --task-grace)
 `;
 }
 
@@ -190,6 +201,7 @@ export function parseCliArgs(argv: string[], env: NodeJS.ProcessEnv = process.en
         until: { type: 'string', short: 'u', multiple: true },
         while: { type: 'string', short: 'w', multiple: true },
         'condition-timeout': { type: 'string' },
+        'task-grace': { type: 'string' },
         'fail-on-error': { type: 'boolean' },
         'pueue-binary': { type: 'string' },
         config: { type: 'string' },
@@ -255,6 +267,19 @@ export function parseCliArgs(argv: string[], env: NodeJS.ProcessEnv = process.en
     throw new UsageError('--condition-timeout must be greater than zero');
   }
 
+  // `forever` restores the pre-0.1.1 behaviour of tolerating an unknown id
+  // indefinitely; `0` fails on the first snapshot that lacks it.
+  const graceRaw = values['task-grace'];
+  const taskGraceMs =
+    graceRaw === undefined
+      ? 5_000
+      : graceRaw.trim().toLowerCase() === 'forever'
+        ? null
+        : parseDuration(graceRaw, '--task-grace');
+  if (taskGraceMs !== null && taskGraceMs < 0) {
+    throw new UsageError('--task-grace must not be negative');
+  }
+
   const until = (values.until ?? []).map((s) => s.trim()).filter((s) => s !== '');
   const whileConds = (values.while ?? []).map((s) => s.trim()).filter((s) => s !== '');
   if ((values.until ?? []).length !== until.length) {
@@ -273,6 +298,7 @@ export function parseCliArgs(argv: string[], env: NodeJS.ProcessEnv = process.en
       timeoutMs,
       intervalMs,
       conditionTimeoutMs,
+      taskGraceMs,
       until,
       while: whileConds,
       failOnError: values['fail-on-error'] === true,
