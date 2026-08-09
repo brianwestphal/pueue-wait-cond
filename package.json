@@ -11,6 +11,15 @@
     "condition",
     "timeout"
   ],
+  "homepage": "https://github.com/brianwestphal/pueue-wait-cond#readme",
+  "bugs": {
+    "url": "https://github.com/brianwestphal/pueue-wait-cond/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/brianwestphal/pueue-wait-cond.git"
+  },
+  "author": "Brian Westphal",
   "license": "MIT",
   "type": "module",
   "engines": {
