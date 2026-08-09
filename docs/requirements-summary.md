@@ -49,6 +49,8 @@ Status markers: **Shipped** · **Partial** · **Design only** · **Deferred**
 | R3.1 | Exit `0` = passes; `--until` any-passes, `--while` any-fails | Shipped |
 | R3.2 | Decision order: complete → until → while → timeout | Shipped |
 | R3.3 | File (exec / via shell) vs inline shell command | Shipped |
+| R3.3.1 | Inline commands are full `sh -c` commands (pipelines, `&&`, `$(...)`, multi-line) | Shipped |
+| R3.3.2 | Documented footguns: single-quote requirement, existing-file shadowing | Shipped |
 | R3.4 | stdin JSON + `$PUEUE_WAIT_STATUS_JSON` + `PUEUE_WAIT_*` env | Shipped |
 | R3.5 | Snapshot contents; **no** `envs` leak | Shipped |
 | R3.6 | Unrunnable condition → exit `6`, never "false" | Shipped |

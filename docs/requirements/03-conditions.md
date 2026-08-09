@@ -39,10 +39,49 @@ Given a condition value:
    - executable → run it directly (its shebang applies);
    - not executable → run it as `<shell> <path>`, so a forgotten `chmod +x`
      still works.
-2. Otherwise → run it as `<shell> -c <value>`.
+2. Otherwise → run it as `<shell> -c <value>`, i.e. an **inline shell command**.
 
-Relative paths resolve against the process's working directory. This makes both
-documented forms work: `--until ./check.sh` and `--until 'test -f /tmp/ready'`.
+Relative paths resolve against the process's working directory. `<shell>` is
+`--shell`, default `/bin/sh`.
+
+Both forms are first-class and must stay documented as such — in `helpText()`,
+in the README, and here. The option is spelled `<SCRIPT|COMMAND>` precisely
+because `<SCRIPT>` alone reads as "path only" and hides half the feature.
+
+### R3.3.1 — Inline commands are full shell commands
+
+Rule 2 hands the value to `sh -c` unmodified, so everything the shell can do is
+available: pipelines, `&&`/`||`, `;`, `$(...)`, redirects, `if`/`then`,
+variable assignment, and multi-line bodies. The **exit status of the last
+command** is the verdict.
+
+```sh
+--until 'curl -sf localhost:8080/health'
+--until 'pueue log 42 | grep -q "Listening on"'
+--until 'test -z "$PUEUE_WAIT_PENDING_TASK_IDS"'
+--while 'test -f /run/deploy.lock && pgrep -q deployd'
+```
+
+Inline commands receive exactly the same inputs as script files (R3.4): the
+snapshot on stdin, `$PUEUE_WAIT_STATUS_JSON`, and the `PUEUE_WAIT_*`
+environment.
+
+### R3.3.2 — Two consequences users must be warned about
+
+**Quoting.** The `PUEUE_WAIT_*` variables exist only in the *condition's*
+environment. Double-quoting an inline command lets the calling shell expand them
+to empty first, silently changing the test. Single quotes are required, and the
+help text and README both say so.
+
+**Path shadowing.** Because rule 1 is checked first, a bare one-word value is
+shadowed by a same-named file in the working directory: with an executable
+`./true` present, `--until 'true'` runs that file rather than the shell builtin.
+
+This ordering is deliberate — the ticket specified `<script-path>`, so a path
+must win — and it is only reachable for single-word values with no space, flag
+or redirect. It is documented rather than fixed; changing it would break the
+documented primary form.
+
 
 ## R3.4 — What a condition receives
 

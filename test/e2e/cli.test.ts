@@ -66,9 +66,24 @@ describe('e2e: help, version and usage', () => {
     const run = await runCli(['--help']);
     assert.equal(run.code, EXIT.OK);
     assert.match(run.stdout, /Usage:\s+pueue-wait-cond \[TASK_IDS\]\.\.\. \[OPTIONS\]/);
-    assert.match(run.stdout, /--until <SCRIPT>/);
-    assert.match(run.stdout, /--while <SCRIPT>/);
+    assert.match(run.stdout, /--until <SCRIPT\|COMMAND>/);
+    assert.match(run.stdout, /--while <SCRIPT\|COMMAND>/);
     assert.equal(run.stderr, '');
+  });
+
+  it('documents inline shell commands, not just script paths', async () => {
+    const run = await runCli(['--help']);
+    assert.match(run.stdout, /INLINE SHELL\s+COMMAND/);
+    // At least one runnable inline example, and both footguns called out.
+    assert.match(run.stdout, /--until 'test -f \/tmp\/ready'/);
+    assert.match(run.stdout, /SINGLE quotes/);
+    assert.match(run.stdout, /shadowed by a same-named file/);
+  });
+
+  it('keeps every help line inside 100 columns', async () => {
+    const run = await runCli(['--help']);
+    const tooWide = run.stdout.split('\n').filter((l) => l.length > 100);
+    assert.deepEqual(tooWide, []);
   });
 
   it('prints a semver version', async () => {
@@ -211,6 +226,50 @@ describe('e2e: --until', () => {
       binary,
       '--until',
       'test "$PUEUE_WAIT_ITERATION" -ge 2',
+      '--interval',
+      '0.01',
+    ]);
+    assert.equal(run.code, EXIT.OK);
+  });
+
+  it('accepts inline commands using full shell syntax', async () => {
+    const binary = stubPueue('until-shell-syntax', [tasks([{ id: 1, status: { Running: {} } }])]);
+    // Pipeline, &&, $(...), and a semicolon-separated statement list.
+    const run = await runCli([
+      '--pueue-binary',
+      binary,
+      '--until',
+      'n=$(echo one two three | wc -w); test "$n" -eq 3 && test -d /',
+      '--interval',
+      '0.01',
+    ]);
+    assert.equal(run.code, EXIT.OK);
+  });
+
+  it('accepts a multi-line inline command', async () => {
+    const binary = stubPueue('until-multiline', [tasks([{ id: 9, status: { Running: {} } }])]);
+    const run = await runCli([
+      '--pueue-binary',
+      binary,
+      '--until',
+      [
+        'ids=$PUEUE_WAIT_PENDING_TASK_IDS',
+        'test -n "$ids" || exit 1',
+        'if test "$ids" = "9"; then exit 0; else exit 1; fi',
+      ].join('\n'),
+      '--interval',
+      '0.01',
+    ]);
+    assert.equal(run.code, EXIT.OK);
+  });
+
+  it('lets an inline command read the snapshot off stdin', async () => {
+    const binary = stubPueue('until-stdin-inline', [tasks([{ id: 3, status: { Running: {} } }])]);
+    const run = await runCli([
+      '--pueue-binary',
+      binary,
+      '--until',
+      'grep -q \'"id": 3\'',
       '--interval',
       '0.01',
     ]);

@@ -56,14 +56,82 @@ exactly": a task that finished between two polls still satisfies
 
 | Option | Meaning |
 | --- | --- |
-| `-u, --until <SCRIPT>` | Stop waiting **successfully** as soon as any `--until` exits `0` |
-| `-w, --while <SCRIPT>` | **Give up** as soon as any `--while` exits non-zero |
+| `-u, --until <SCRIPT\|COMMAND>` | Stop waiting **successfully** as soon as any `--until` exits `0` |
+| `-w, --while <SCRIPT\|COMMAND>` | **Give up** as soon as any `--while` exits non-zero |
 | `--condition-timeout <SECONDS>` | Kill a condition that runs this long (default `30`) |
 
-Both are repeatable. A condition that names an existing file is executed
-directly (or handed to `--shell` if it isn't executable); anything else is run as
-an inline shell command, so `--until 'test -f /tmp/ready'` works without a
-wrapper script.
+Both are repeatable: `--until` fires when **any** of them passes, `--while`
+gives up when **any** of them fails.
+
+Each takes either a **script path** or an **inline shell command** — see below.
+
+## Inline conditions
+
+You do not need a wrapper script. A condition value that names an **existing
+file** is executed as a script; **anything else is run as an inline shell
+command** (`/bin/sh -c`), so full shell syntax is available:
+
+```sh
+# a plain test
+pueue-wait-cond 42 --until 'test -f /tmp/ready'
+
+# an HTTP healthcheck
+pueue-wait-cond 42 --until 'curl -sf localhost:8080/health'
+
+# a pipeline over the task's own log
+pueue-wait-cond 42 --until 'pueue log 42 | grep -q "Listening on"'
+
+# && chaining, in a guard
+pueue-wait-cond -g build --while 'test -f /run/deploy.lock && pgrep -q deployd'
+```
+
+Multiple statements, `if`/`then`, and multiple lines all work. The **exit status
+of the last command** is the verdict:
+
+```sh
+pueue-wait-cond -g build --timeout 10m --until '
+  ids=$PUEUE_WAIT_PENDING_TASK_IDS
+  test -n "$ids" || exit 1
+  echo "still pending: $ids" >&2
+  curl -sf localhost:8080/health
+'
+```
+
+Inline commands get the same inputs as script files — the snapshot on stdin, the
+same JSON at `$PUEUE_WAIT_STATUS_JSON`, and the `PUEUE_WAIT_*` environment:
+
+```sh
+# stop once nothing is left pending
+pueue-wait-cond -a --until 'test -z "$PUEUE_WAIT_PENDING_TASK_IDS"'
+
+# query the snapshot on stdin with jq
+pueue-wait-cond 42 --until 'jq -e ".tasks[0].result == \"Success\"" >/dev/null'
+
+# or read it from the file, for tools that want a path
+pueue-wait-cond 42 --until 'grep -q Running "$PUEUE_WAIT_STATUS_JSON"'
+```
+
+Use `--shell /bin/bash` if you want bashisms such as `[[ ]]`.
+
+### Two things that will bite you
+
+**Quote with single quotes.** With double quotes, *your* shell expands
+`$PUEUE_WAIT_*` before `pueue-wait-cond` ever sees the string:
+
+```sh
+--until "test $PUEUE_WAIT_ITERATION -ge 3"   # ✗ becomes: test  -ge 3
+--until 'test $PUEUE_WAIT_ITERATION -ge 3'   # ✓
+```
+
+**Existing files win over command names.** Because the rule is "file path first,
+shell command otherwise", a bare one-word value collides with a same-named file
+in the working directory — with a `./true` file present, `--until 'true'` runs
+*that file*, not the shell builtin. Anything containing a space, flag or
+redirect can't collide.
+
+**Tip:** a long inline script is echoed in full into the progress and
+`[--until …]` output prefixes, which gets noisy. Move it to a script file once it
+outgrows a line or two.
 
 ### Timing
 

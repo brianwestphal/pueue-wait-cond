@@ -70,6 +70,39 @@ describe('resolveCommand', () => {
     assert.deepEqual(resolved.args, ['-c', dir]);
   });
 
+  it('lets an existing file shadow a same-named shell builtin', () => {
+    // Documented in requirements 03 R3.3.2: rule 1 (existing file) is checked
+    // before rule 2 (inline command), so a bare one-word value collides with a
+    // file of that name in the working directory. Pinned so the ordering is not
+    // "tidied up" later without a deliberate decision.
+    const cwd = process.cwd();
+    try {
+      process.chdir(dir);
+      script('true', '#!/bin/sh\nexit 1\n');
+      const resolved = resolveCommand('true', '/bin/sh');
+      assert.equal(resolved.viaShell, false, 'should have resolved to the file, not the builtin');
+      assert.match(resolved.file, /\/true$/);
+    } finally {
+      process.chdir(cwd);
+    }
+  });
+
+  it('treats a multi-word value as a command even if the first word is a file', () => {
+    const cwd = process.cwd();
+    try {
+      process.chdir(dir);
+      script('echo', '#!/bin/sh\nexit 1\n');
+      // "echo hi" names no file, so it stays an inline command.
+      assert.deepEqual(resolveCommand('echo hi', '/bin/sh'), {
+        file: '/bin/sh',
+        args: ['-c', 'echo hi'],
+        viaShell: true,
+      });
+    } finally {
+      process.chdir(cwd);
+    }
+  });
+
   it('resolves a relative path against the cwd', () => {
     const cwd = process.cwd();
     try {
