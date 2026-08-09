@@ -189,6 +189,96 @@ describe('run — outcomes', () => {
   });
 });
 
+describe('run — --json', () => {
+  const parse = (text: string): Record<string, unknown> =>
+    JSON.parse(text) as Record<string, unknown>;
+
+  it('prints one parseable object and no progress lines', async () => {
+    const { code, stdout } = await cli(['--json']);
+    assert.equal(code, EXIT.OK);
+    const json = parse(stdout);
+    assert.equal(json.outcome, 'reached');
+    assert.equal(json.exitCode, 0);
+    assert.equal(stdout.includes('reached "done"'), false, 'progress must not be mixed in');
+  });
+
+  it('implies --quiet', async () => {
+    const { seen } = await cli(['--json']);
+    assert.equal(seen?.quiet, true);
+    assert.equal(seen?.json, true);
+  });
+
+  it('leaves --quiet off when --json is absent', async () => {
+    const { seen } = await cli([]);
+    assert.equal(seen?.quiet, false);
+    assert.equal(seen?.json, false);
+  });
+
+  it('carries the run metadata', async () => {
+    const script = [makeSnapshot([{ id: 1, status: RUNNING }]), makeSnapshot([{ id: 1, status: done() }])];
+    const { stdout } = await cli(['--json', '--interval', '0.001'], script);
+    const json = parse(stdout);
+    assert.equal(json.iterations, 2);
+    assert.equal(typeof json.elapsedMs, 'number');
+    assert.equal(json.targetStatus, 'done');
+    assert.deepEqual(json.pendingIds, []);
+  });
+
+  it('reports a failed task in failedIds', async () => {
+    const { code, stdout } = await cli(['--json', '--fail-on-error'], [
+      makeSnapshot([{ id: 1, status: failed(3) }]),
+    ]);
+    assert.equal(code, EXIT.TASK_FAILURE);
+    const json = parse(stdout);
+    assert.deepEqual(json.failedIds, [1]);
+    assert.equal(json.exitCode, 1);
+    assert.deepEqual((json.tasks as Array<Record<string, unknown>>)[0]?.exitCode, 3);
+  });
+
+  it('names the condition that ended the wait', async () => {
+    const script = [makeSnapshot([{ id: 1, status: RUNNING }])];
+    const { stdout } = await cli(['--json', '--until', 'exit 0', '--interval', '0.001'], script);
+    const json = parse(stdout);
+    assert.equal(json.outcome, 'until');
+    assert.deepEqual(json.condition, { kind: 'until', value: 'exit 0', exitCode: 0 });
+  });
+
+  it('reports a usage error as JSON on stdout', async () => {
+    const { code, stdout, stderr } = await cli(['--json', '--nonsense']);
+    assert.equal(code, EXIT.USAGE);
+    assert.equal(stderr, '');
+    const json = parse(stdout);
+    assert.equal(json.outcome, 'error');
+    assert.equal(json.exitCode, 2);
+    assert.equal((json.error as Record<string, unknown>).kind, 'usage');
+  });
+
+  it('reports a pueue error as JSON', async () => {
+    const { code, stdout } = await cli(['--json'], [new PueueError('daemon is down')]);
+    assert.equal(code, EXIT.PUEUE_ERROR);
+    const json = parse(stdout);
+    assert.equal(json.outcome, 'error');
+    assert.equal((json.error as Record<string, unknown>).kind, 'pueue');
+    assert.match(String((json.error as Record<string, unknown>).message), /daemon is down/);
+  });
+
+  it('reports a condition spawn error as JSON', async () => {
+    const script = [makeSnapshot([{ id: 1, status: RUNNING }])];
+    const { code, stdout } = await cli(
+      ['--json', '--until', 'x', '--shell', '/no/such/shell'],
+      script,
+    );
+    assert.equal(code, EXIT.CONDITION_ERROR);
+    assert.equal((parse(stdout).error as Record<string, unknown>).kind, 'condition');
+  });
+
+  it('still prints prose errors without --json', async () => {
+    const { stdout, stderr } = await cli([], [new PueueError('daemon is down')]);
+    assert.equal(stdout, '');
+    assert.match(stderr, /error: daemon is down/);
+  });
+});
+
 describe('readPackageVersion', () => {
   it('finds the manifest from the source tree', () => {
     assert.match(readPackageVersion(), /^\d+\.\d+\.\d+/);

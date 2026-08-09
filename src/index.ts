@@ -10,6 +10,14 @@ export { conditionEnv, ConditionSpawnError, resolveCommand, runCondition } from 
 export type { ConditionContext, ConditionKind, ConditionOutcome } from './condition.js';
 export { EXIT, exitCodeName } from './exitCodes.js';
 export type { ExitCode } from './exitCodes.js';
+export { buildJsonError, buildJsonResult, renderJson } from './json.js';
+export type {
+  JsonCondition,
+  JsonError,
+  JsonErrorKind,
+  JsonResult,
+  JsonTask,
+} from './json.js';
 export { createPueueClient, PueueError } from './pueue.js';
 export type { PueueClient, PueueClientOptions } from './pueue.js';
 export { Reporter, shouldUseColor } from './reporter.js';
@@ -28,6 +36,6 @@ export {
 export type { Snapshot, TargetStatus, TaskState } from './status.js';
 export { readPackageVersion } from './version.js';
 export { outcomeToExitCode, selectTasks, snapshotForConditions, waitForConditions } from './wait.js';
-export type { WaitDeps, WaitOutcome } from './wait.js';
+export type { WaitDeps, WaitMeta, WaitOutcome, WaitResolution } from './wait.js';
 export { main, run } from './cli.js';
 export type { RunOptions } from './cli.js';

@@ -2,6 +2,8 @@ import type { Options } from './args.js';
 import { helpText, parseCliArgs, UsageError } from './args.js';
 import { ConditionSpawnError } from './condition.js';
 import { EXIT } from './exitCodes.js';
+import { buildJsonError, buildJsonResult, renderJson } from './json.js';
+import type { JsonErrorKind } from './json.js';
 import { createPueueClient } from './pueue.js';
 import type { PueueClient } from './pueue.js';
 import { Reporter, shouldUseColor } from './reporter.js';
@@ -24,11 +26,25 @@ export async function run(options: RunOptions): Promise<number> {
   const env = options.env ?? process.env;
   const { stdout, stderr } = options;
 
+  // A usage error happens before the arguments are understood, so `--json` has
+  // to be sniffed out of argv directly — otherwise the one case a caller most
+  // needs machine-readable (they got the invocation wrong) would print prose.
+  const wantsJson = options.argv.includes('--json');
+  const fail = (kind: JsonErrorKind, message: string, code: number): number => {
+    if (wantsJson) {
+      stdout.write(renderJson(buildJsonError(kind, message, code)));
+    } else {
+      stderr.write(`error: ${message}\n`);
+    }
+    return code;
+  };
+
   let parsed;
   try {
     parsed = parseCliArgs(options.argv, env);
   } catch (error) {
     if (error instanceof UsageError) {
+      if (wantsJson) return fail('usage', error.message, EXIT.USAGE);
       stderr.write(`error: ${error.message}\n\nRun \`pueue-wait-cond --help\` for usage.\n`);
       return EXIT.USAGE;
     }
@@ -62,22 +78,22 @@ export async function run(options: RunOptions): Promise<number> {
       }));
 
   try {
-    const outcome = await waitForConditions({
+    const resolution = await waitForConditions({
       client: makeClient(opts),
       reporter,
       options: opts,
       ...(options.signal !== undefined ? { signal: options.signal } : {}),
       env,
     });
-    return outcomeToExitCode(outcome, opts);
+    const code = outcomeToExitCode(resolution, opts);
+    if (opts.json) stdout.write(renderJson(buildJsonResult(resolution, code)));
+    return code;
   } catch (error) {
     if (error instanceof PueueError) {
-      reporter.error(`error: ${error.message}`);
-      return EXIT.PUEUE_ERROR;
+      return fail('pueue', error.message, EXIT.PUEUE_ERROR);
     }
     if (error instanceof ConditionSpawnError) {
-      reporter.error(`error: ${error.message}`);
-      return EXIT.CONDITION_ERROR;
+      return fail('condition', error.message, EXIT.CONDITION_ERROR);
     }
     throw error;
   }

@@ -234,7 +234,54 @@ Durations are seconds by default; `ms` / `s` / `m` / `h` suffixes also work
 | `--config <PATH>`, `--profile <NAME>` | Forwarded to `pueue` |
 | `--shell <PATH>` | Shell for non-executable conditions (default `/bin/sh`) |
 | `-q, --quiet` | No progress output |
+| `--json` | One JSON object on stdout instead of progress (implies `--quiet`) |
 | `-h, --help`, `-V, --version` | |
+
+### JSON output
+
+`--json` prints **exactly one object on stdout** when the run resolves, so you
+can branch on the result rather than scraping progress lines:
+
+```console
+$ pueue-wait-cond -g build --json --until ./ready.sh | jq -r '.outcome, .elapsedMs'
+until
+8231
+```
+
+```json
+{
+  "outcome": "reached",
+  "exitCode": 0,
+  "elapsedMs": 12500,
+  "iterations": 6,
+  "targetStatus": "done",
+  "group": "build",
+  "tasks": [
+    { "id": 4, "group": "build", "label": null, "command": "make",
+      "status": "Done", "result": "Success", "exitCode": null }
+  ],
+  "pendingIds": [],
+  "failedIds": [],
+  "condition": null,
+  "unknownIds": []
+}
+```
+
+`outcome` is one of `reached`, `until`, `while`, `timeout`, `unreachable`,
+`unknown-tasks`, `interrupted`. `condition` is filled in only when a condition
+ended the wait; `unknownIds` only for `unknown-tasks`. Every key is always
+present — absent values are `null` or `[]`, never omitted.
+
+**Errors are JSON too**, so you never have to guess whether stdout is parseable:
+
+```json
+{ "outcome": "error", "exitCode": 5,
+  "error": { "kind": "pueue", "message": "..." } }
+```
+
+`kind` is `usage`, `pueue` or `condition`. This includes usage errors — getting
+the invocation wrong is exactly when a script wants a structured answer. In this
+mode stderr stays empty.
 
 ## What conditions receive
 

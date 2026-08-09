@@ -23,7 +23,7 @@ Status markers: **Shipped** · **Partial** · **Design only** · **Deferred**
 | --- | --- | --- |
 | R1.1 | `pueue-wait-cond [TASK_IDS]... [OPTIONS]` | Shipped |
 | R1.2 | `pueue wait` parity: ids, `-g`, `-a`, `-q`, `-s`, `-h` | Shipped |
-| R1.3 | Added: `--timeout`, `--until`, `--while`, `--interval`, `--condition-timeout`, `--fail-on-error`, `--pueue-binary`, `--config`, `--profile`, `--shell`, `-V` | Shipped |
+| R1.3 | Added: `--timeout`, `--until`, `--while`, `--interval`, `--condition-timeout`, `--task-grace`, `--fail-on-error`, `--json`, `--pueue-binary`, `--config`, `--profile`, `--shell`, `-V` | Shipped |
 | R1.4 | Durations: bare seconds + `ms`/`s`/`m`/`h` | Shipped |
 | R1.5 | 8 `--status` values (superset of pueue's) | Shipped |
 | R1.6 | Usage errors → stderr, exit `2` | Shipped |
@@ -69,6 +69,10 @@ Status markers: **Shipped** · **Partial** · **Design only** · **Deferred**
 | R4.4 | Extra lines for conditions, timeout, completion; already-finished tasks still reported | Shipped |
 | R4.5 | Stream discipline (stdout progress / stderr diagnostics) | Shipped |
 | R4.6 | TTY colour, `NO_COLOR` > `FORCE_COLOR` | Shipped |
+| R4.7 | `--json`: one result object on stdout, implies `--quiet` | Shipped |
+| R4.7.1 | Result shape; every key always present; no `envs` leak | Shipped |
+| R4.7.2 | Errors (usage/pueue/condition) emitted as JSON too | Shipped |
+| R4.7.3 | Shape is a public interface; additive changes only | Shipped |
 
 ### 05 — Packaging
 
@@ -103,7 +107,6 @@ Tracked as Hot Sheet tickets:
   npm page has no repo links and does not refuse Windows installs. A `0.1.1`
   release is needed to carry them.
 - No CI workflow.
-- No `--json` machine-readable result output.
 
 Closed by decision, not by implementation:
 

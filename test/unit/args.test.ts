@@ -180,6 +180,9 @@ describe('parseCliArgs — --task-grace', () => {
 
   it('rejects nonsense', () => {
     assert.throws(() => opts(['--task-grace', 'soon']), /--task-grace expects a duration/);
+    assert.throws(() => opts(['--task-grace', 'forevr']), /--task-grace expects a duration/);
+    // Negatives never reach a range check: the duration pattern admits no sign,
+    // so `-1` is taken as an unknown option and rejected during parsing.
     assert.throws(() => opts(['--task-grace', '-1']), UsageError);
   });
 });

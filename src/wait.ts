@@ -24,7 +24,7 @@ import { EXIT } from './exitCodes.js';
 import type { PueueClient } from './pueue.js';
 import { PueueError } from './pueue.js';
 import type { Reporter } from './reporter.js';
-import type { Snapshot, TaskState } from './status.js';
+import type { Snapshot, TargetStatus, TaskState } from './status.js';
 import { hasReached, isFailure, isUnreachable } from './status.js';
 
 export type WaitOutcome =
@@ -35,6 +35,26 @@ export type WaitOutcome =
   | { kind: 'unreachable'; tasks: TaskState[]; failed: TaskState[] }
   | { kind: 'unknown-tasks'; ids: number[] }
   | { kind: 'interrupted' };
+
+/**
+ * Facts about the run itself, as opposed to how it ended.
+ *
+ * Attached to the outcome as an intersection rather than folded into each
+ * variant, so `result.kind` narrowing keeps working exactly as before.
+ */
+export interface WaitMeta {
+  elapsedMs: number;
+  /** Number of polls performed. */
+  iterations: number;
+  targetStatus: TargetStatus;
+  group: string | null;
+  /** The selected tasks as of the final poll. */
+  tasks: TaskState[];
+  pendingIds: number[];
+  failedIds: number[];
+}
+
+export type WaitResolution = WaitOutcome & { meta: WaitMeta };
 
 export interface WaitDeps {
   client: PueueClient;
@@ -139,7 +159,7 @@ interface ConditionCheck {
   exitCode: number | null;
 }
 
-export async function waitForConditions(deps: WaitDeps): Promise<WaitOutcome> {
+export async function waitForConditions(deps: WaitDeps): Promise<WaitResolution> {
   const { client, reporter, options } = deps;
   const now = deps.now ?? (() => Date.now());
   const sleep = deps.sleep ?? defaultSleep;
@@ -162,9 +182,24 @@ export async function waitForConditions(deps: WaitDeps): Promise<WaitOutcome> {
    */
   let missingSince: number | null = null;
 
+  let meta: WaitMeta = {
+    elapsedMs: 0,
+    iterations: 0,
+    targetStatus: options.targetStatus,
+    group: selectionGroup(options),
+    tasks: [],
+    pendingIds: [],
+    failedIds: [],
+  };
+  /** Stamp the run's metadata onto whichever outcome we are returning. */
+  const finish = (outcome: WaitOutcome): WaitResolution => ({
+    ...outcome,
+    meta: { ...meta, elapsedMs: now() - startedAt },
+  });
+
   try {
     for (;;) {
-      if (signal.aborted) return { kind: 'interrupted' };
+      if (signal.aborted) return finish({ kind: 'interrupted' });
 
       const snapshot = await client.fetchSnapshot();
       const selected = selectTasks(snapshot, options);
@@ -196,13 +231,21 @@ export async function waitForConditions(deps: WaitDeps): Promise<WaitOutcome> {
       const pending = selected.filter((t) => !hasReached(t, options.targetStatus));
       const failed = selected.filter(isFailure);
 
+      meta = {
+        ...meta,
+        iterations: iteration + 1,
+        tasks: selected,
+        pendingIds: pending.map((t) => t.id),
+        failedIds: failed.map((t) => t.id),
+      };
+
       // 1. Primary completion. An empty selection only counts as complete when
       //    the user did not name specific ids — `wait 42` before task 42 exists
       //    should keep waiting, not claim instant success.
       const selectionSatisfiable = selected.length > 0 || options.selection.mode !== 'ids';
       if (pending.length === 0 && selectionSatisfiable && absent.length === 0) {
         reporter.allReached(options.targetStatus, reached.length);
-        return { kind: 'reached', tasks: reached, failed };
+        return finish({ kind: 'reached', tasks: reached, failed });
       }
 
       // 1a. Named ids that never showed up. Bounded by `--task-grace` so a typo
@@ -215,7 +258,7 @@ export async function waitForConditions(deps: WaitDeps): Promise<WaitOutcome> {
         now() - missingSince >= options.taskGraceMs
       ) {
         reporter.unknownTasks(absent, options.taskGraceMs);
-        return { kind: 'unknown-tasks', ids: absent };
+        return finish({ kind: 'unknown-tasks', ids: absent });
       }
 
       // 1b. A finished task can never become `success`/`failed` after the fact,
@@ -226,7 +269,7 @@ export async function waitForConditions(deps: WaitDeps): Promise<WaitOutcome> {
           `Task(s) ${stuck.map((t) => t.id).join(', ')} finished without reaching ` +
             `"${options.targetStatus}"; giving up.`,
         );
-        return { kind: 'unreachable', tasks: selected, failed };
+        return finish({ kind: 'unreachable', tasks: selected, failed });
       }
 
       const baseContext = {
@@ -270,7 +313,7 @@ export async function waitForConditions(deps: WaitDeps): Promise<WaitOutcome> {
       for (const check of await evaluate('until', options.until)) {
         if (check.passed) {
           reporter.untilSatisfied(check.value);
-          return { kind: 'until', value: check.value };
+          return finish({ kind: 'until', value: check.value });
         }
       }
 
@@ -278,7 +321,7 @@ export async function waitForConditions(deps: WaitDeps): Promise<WaitOutcome> {
       for (const check of await evaluate('while', options.while)) {
         if (!check.passed) {
           reporter.whileViolated(check.value, check.exitCode);
-          return { kind: 'while', value: check.value, exitCode: check.exitCode };
+          return finish({ kind: 'while', value: check.value, exitCode: check.exitCode });
         }
       }
 
@@ -287,7 +330,7 @@ export async function waitForConditions(deps: WaitDeps): Promise<WaitOutcome> {
       const elapsed = now() - startedAt;
       if (options.timeoutMs !== null && elapsed >= options.timeoutMs) {
         reporter.timedOut(options.timeoutMs, pending.map((t) => t.id));
-        return { kind: 'timeout', pendingIds: pending.map((t) => t.id) };
+        return finish({ kind: 'timeout', pendingIds: pending.map((t) => t.id) });
       }
 
       // Never sleep past the deadline.

@@ -446,6 +446,114 @@ describe('e2e: --while', () => {
   });
 });
 
+describe('e2e: --json', () => {
+  const parse = (text: string): Record<string, unknown> => {
+    try {
+      return JSON.parse(text) as Record<string, unknown>;
+    } catch (error) {
+      throw new Error(`stdout was not valid JSON: ${(error as Error).message}\n---\n${text}\n---`);
+    }
+  };
+
+  it('emits exactly one JSON object on stdout for a completed wait', async () => {
+    const binary = stubPueue('json-ok', [
+      tasks([{ id: 1, status: 'Queued' }]),
+      tasks([{ id: 1, status: doneOk }]),
+    ]);
+    const run = await runCli(['--pueue-binary', binary, '--json', '--interval', '0.01']);
+    assert.equal(run.code, EXIT.OK);
+    const json = parse(run.stdout);
+    assert.equal(json.outcome, 'reached');
+    assert.equal(json.exitCode, 0);
+    assert.equal(json.targetStatus, 'done');
+    assert.ok(Array.isArray(json.tasks));
+    // Progress lines would break the parse above, but be explicit about it.
+    assert.equal(run.stdout.trimStart().startsWith('{'), true);
+    assert.equal(run.stdout.trimEnd().endsWith('}'), true);
+  });
+
+  it('is parseable for every failure mode', async () => {
+    const running = [tasks([{ id: 1, status: { Running: {} } }])];
+
+    const timeout = await runCli([
+      '--pueue-binary',
+      stubPueue('json-timeout', running),
+      '--json',
+      '--timeout',
+      '0.2',
+      '--interval',
+      '0.05',
+    ]);
+    assert.equal(timeout.code, EXIT.TIMEOUT);
+    assert.equal(parse(timeout.stdout).outcome, 'timeout');
+    assert.deepEqual(parse(timeout.stdout).pendingIds, [1]);
+
+    const guard = await runCli([
+      '--pueue-binary',
+      stubPueue('json-while', running),
+      '--json',
+      '--while',
+      'exit 9',
+      '--interval',
+      '0.05',
+    ]);
+    assert.equal(guard.code, EXIT.CONDITION_FAILED);
+    assert.deepEqual(parse(guard.stdout).condition, {
+      kind: 'while',
+      value: 'exit 9',
+      exitCode: 9,
+    });
+
+    const unknown = await runCli([
+      '--pueue-binary',
+      stubPueue('json-unknown', [tasks([{ id: 1, status: doneOk }])]),
+      '4242',
+      '--json',
+      '--task-grace',
+      '0',
+    ]);
+    assert.equal(unknown.code, EXIT.UNKNOWN_TASKS);
+    assert.deepEqual(parse(unknown.stdout).unknownIds, [4242]);
+  });
+
+  it('reports errors as JSON on stdout, leaving stderr empty', async () => {
+    const usage = await runCli(['--json', '--bogus-flag']);
+    assert.equal(usage.code, EXIT.USAGE);
+    assert.equal(usage.stderr, '');
+    assert.equal((parse(usage.stdout).error as Record<string, unknown>).kind, 'usage');
+
+    const missing = await runCli(['--json', '--pueue-binary', join(dir, 'absent-binary')]);
+    assert.equal(missing.code, EXIT.PUEUE_ERROR);
+    assert.equal((parse(missing.stdout).error as Record<string, unknown>).kind, 'pueue');
+  });
+
+  it('suppresses progress and condition chatter', async () => {
+    const binary = stubPueue('json-quiet', [tasks([{ id: 1, status: { Running: {} } }])]);
+    const chatty = writeScript(dir, 'json-chatty.sh', '#!/bin/sh\necho NOISE\nexit 0\n');
+    const run = await runCli([
+      '--pueue-binary',
+      binary,
+      '--json',
+      '--until',
+      chatty,
+      '--interval',
+      '0.01',
+    ]);
+    assert.equal(run.code, EXIT.OK);
+    assert.equal(run.stdout.includes('NOISE'), false);
+    assert.equal(run.stderr.includes('NOISE'), false);
+    assert.equal(parse(run.stdout).outcome, 'until');
+  });
+
+  it('pipes cleanly into a JSON consumer', async () => {
+    // The realistic usage: pueue-wait-cond --json | jq -r .outcome
+    const binary = stubPueue('json-pipe', [tasks([{ id: 1, status: doneOk }])]);
+    const run = await runCli(['--pueue-binary', binary, '--json']);
+    const outcome = (parse(run.stdout) as { outcome: string }).outcome;
+    assert.equal(outcome, 'reached');
+  });
+});
+
 describe('e2e: signals', () => {
   it('exits 130 on SIGINT', async () => {
     const binary = stubPueue('sigint', [tasks([{ id: 1, status: { Running: {} } }])]);

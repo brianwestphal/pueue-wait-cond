@@ -43,15 +43,17 @@ one is a usage error. Supplying none waits on the `default` group.
 | Option | Requirement |
 | --- | --- |
 | `-t, --timeout <SECONDS>` | Abandon the wait after this long. Default: no timeout. |
-| `-u, --until <SCRIPT>` | Repeatable. Stop waiting successfully when it exits `0`. |
-| `-w, --while <SCRIPT>` | Repeatable. Abandon the wait when it exits non-zero. |
+| `-u, --until <SCRIPT\|COMMAND>` | Repeatable. Stop waiting successfully when it exits `0`. |
+| `-w, --while <SCRIPT\|COMMAND>` | Repeatable. Abandon the wait when it exits non-zero. |
 | `-i, --interval <SECONDS>` | Poll period. Default `2`. |
 | `--condition-timeout <SECONDS>` | Per-run budget for a condition script. Default `30`. |
+| `--task-grace <SECONDS\|forever>` | How long a named id may be missing before exit `7`. Default `5`. See R2.6. |
+| `--json` | Emit one JSON result object on stdout; implies `--quiet`. See R4.7. |
 | `--fail-on-error` | Exit `1` when the wait completes with a failed task. |
 | `--pueue-binary <PATH>` | pueue executable. Default `$PUEUE_BINARY`, else `pueue`. |
 | `--config <PATH>` | Forwarded to pueue as `--config`. |
 | `--profile <NAME>` | Forwarded to pueue as `--profile`. |
-| `--shell <PATH>` | Shell for non-executable conditions. Default `/bin/sh`. |
+| `--shell <PATH>` | Shell for inline commands and non-executable scripts. Default `/bin/sh`. |
 | `-V, --version` | Print the package version and exit `0`. |
 
 ## R1.4 — Duration parsing

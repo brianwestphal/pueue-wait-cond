@@ -14,6 +14,8 @@ export interface Options {
   selection: Selection;
   targetStatus: TargetStatus;
   quiet: boolean;
+  /** Emit a single JSON object on stdout instead of progress lines. */
+  json: boolean;
   /** Overall wall-clock budget in ms; `null` means wait forever. */
   timeoutMs: number | null;
   /** Poll period in ms. */
@@ -142,6 +144,10 @@ pueue plumbing:
 
 Output:
   -q, --quiet              Don't show any log output while waiting
+      --json               Print one JSON object describing the result on
+                           stdout instead of progress lines (implies --quiet).
+                           Errors are reported as JSON too, so a caller can
+                           always parse stdout. See "JSON output" below.
   -h, --help               Print help
   -V, --version            Print version
 
@@ -172,6 +178,24 @@ Writing conditions:
   directory, because existing files win: with a ./true file present,
   --until 'true' runs that file, not the shell builtin.
 
+JSON output (--json):
+  A resolved run prints:
+
+      { "outcome": "reached" | "until" | "while" | "timeout" | "unreachable"
+                 | "unknown-tasks" | "interrupted",
+        "exitCode": 0, "elapsedMs": 12500, "iterations": 6,
+        "targetStatus": "done", "group": null,
+        "tasks": [ { "id": 4, "status": "Done", "result": "Success", ... } ],
+        "pendingIds": [], "failedIds": [], "unknownIds": [],
+        "condition": { "kind": "until", "value": "./ready.sh", "exitCode": 0 } }
+
+  A failure before the wait resolves prints:
+
+      { "outcome": "error", "exitCode": 5,
+        "error": { "kind": "usage" | "pueue" | "condition", "message": "..." } }
+
+  Every shape carries "outcome" and "exitCode".
+
 Exit codes:
   0  tasks reached the target status, or an --until condition passed
   1  the wait completed but a task failed (--fail-on-error / --status success)
@@ -195,6 +219,7 @@ export function parseCliArgs(argv: string[], env: NodeJS.ProcessEnv = process.en
         group: { type: 'string', short: 'g' },
         all: { type: 'boolean', short: 'a' },
         quiet: { type: 'boolean', short: 'q' },
+        json: { type: 'boolean' },
         status: { type: 'string', short: 's' },
         timeout: { type: 'string', short: 't' },
         interval: { type: 'string', short: 'i' },
@@ -276,9 +301,9 @@ export function parseCliArgs(argv: string[], env: NodeJS.ProcessEnv = process.en
       : graceRaw.trim().toLowerCase() === 'forever'
         ? null
         : parseDuration(graceRaw, '--task-grace');
-  if (taskGraceMs !== null && taskGraceMs < 0) {
-    throw new UsageError('--task-grace must not be negative');
-  }
+  // No lower-bound check: unlike the other durations, `0` is meaningful here
+  // (fail on the first poll), and `parseDuration` cannot yield a negative — its
+  // pattern does not admit a sign, so `-1` is rejected before reaching us.
 
   const until = (values.until ?? []).map((s) => s.trim()).filter((s) => s !== '');
   const whileConds = (values.while ?? []).map((s) => s.trim()).filter((s) => s !== '');
@@ -294,7 +319,10 @@ export function parseCliArgs(argv: string[], env: NodeJS.ProcessEnv = process.en
     options: {
       selection,
       targetStatus,
-      quiet: values.quiet === true,
+      // `--json` owns stdout, so progress lines have to go. Treat it as implying
+      // --quiet rather than interleaving prose with the object.
+      quiet: values.quiet === true || values.json === true,
+      json: values.json === true,
       timeoutMs,
       intervalMs,
       conditionTimeoutMs,
