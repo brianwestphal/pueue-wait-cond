@@ -112,7 +112,11 @@ describe('Reporter', () => {
   it('summarizes the tasks being watched', () => {
     const { out, reporter } = makeReporter();
     reporter.watching([task({ id: 1, kind: 'Queued' }), task({ id: 2, kind: 'Running' })]);
-    assert.match(out.text, /Waiting on 2 task\(s\): 1 \(Queued\), 2 \(Running\)\n$/);
+    assert.equal(
+      out.text,
+      '12:00:00 - Waiting on 2 task(s): 1 (Queued), 2 (Running)\n',
+      'the first observation reports initial states in the waiting summary',
+    );
   });
 
   it('says nothing when there is nothing to watch', () => {

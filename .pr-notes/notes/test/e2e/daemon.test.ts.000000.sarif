@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "Hot Sheet",
+          "rules": [
+            {
+              "id": "review-note",
+              "name": "ReviewNote",
+              "shortDescription": {
+                "text": "AI-authored, line-anchored review note."
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "review-note",
+          "ruleIndex": 0,
+          "kind": "informational",
+          "level": "none",
+          "guid": "msmvphig1mfidn9u",
+          "message": {
+            "text": "The initial queued state is deliberately emitted by Reporter.watching in the first-poll summary; a taskChanged line only exists after a subsequent state transition, so this assertion follows the CLI’s actual output contract.",
+            "markdown": "The initial queued state is deliberately emitted by Reporter.watching in the first-poll summary; a taskChanged line only exists after a subsequent state transition, so this assertion follows the CLI’s actual output contract."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "test/e2e/daemon.test.ts"
+                },
+                "region": {
+                  "startLine": 228,
+                  "endLine": 228,
+                  "snippet": {
+                    "text": "    assert.match(run.stdout, new RegExp(`Waiting on 1 task\\\\(s\\\\): ${id} \\\\(Queued\\\\)`));"
+                  }
+                }
+              }
+            }
+          ],
+          "properties": {
+            "tags": [
+              "test-evidence"
+            ],
+            "ext-ai-tool-confidence": 0.99
+          },
+          "rank": 85,
+          "workItemUris": [
+            "PWC-21"
+          ],
+          "partialFingerprints": {
+            "prNoteAnchor/v1": "d4e9e6fe6f13dd3f9323c60ff3d55512"
+          }
+        }
+      ],
+      "versionControlProvenance": [
+        {
+          "repositoryUri": "git@github.com:brianwestphal/pueue-wait-cond.git",
+          "revisionId": "c3b583255253ea667b750eba68b543bc346bea39",
+          "branch": "main"
+        }
+      ]
+    }
+  ]
+}

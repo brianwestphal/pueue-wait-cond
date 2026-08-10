@@ -225,7 +225,7 @@ describe('e2e (real daemon): lifecycle transitions', { skip }, () => {
 
     const run = await runCli([...daemon.cliArgs(), String(id), '--interval', '0.2']);
     assert.equal(run.code, EXIT.OK);
-    assert.match(run.stdout, new RegExp(`Task ${id} .*(Queued|changed)`));
+    assert.match(run.stdout, new RegExp(`Waiting on 1 task\\(s\\): ${id} \\(Queued\\)`));
     assert.match(run.stdout, new RegExp(`Task ${id} succeeded with 0`));
     assert.ok(blocker >= 0);
   });
