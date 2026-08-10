@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "Hot Sheet",
+          "rules": [
+            {
+              "id": "review-note",
+              "name": "ReviewNote",
+              "shortDescription": {
+                "text": "AI-authored, line-anchored review note."
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "review-note",
+          "ruleIndex": 0,
+          "kind": "informational",
+          "level": "none",
+          "guid": "msmlij2ej7r03r1j",
+          "message": {
+            "text": "The release pitch now leads with all three headline capabilities and the transcript includes the initial waiting and failed-condition lines that the real reporter emits; omitting them made the old screenshot-like example stale.",
+            "markdown": "The release pitch now leads with all three headline capabilities and the transcript includes the initial waiting and failed-condition lines that the real reporter emits; omitting them made the old screenshot-like example stale."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "README.md"
+                },
+                "region": {
+                  "startLine": 3,
+                  "endLine": 20,
+                  "snippet": {
+                    "text": "`pueue wait`, plus **timeouts**, **script conditions**, and **machine-readable\nresults**.\n\n[pueue](https://github.com/Nukesor/pueue) can wait for tasks to finish. It cannot\ngive up after a while, and it cannot stop early because *something else* became\ntrue. `pueue-wait-cond` does both, emits stable JSON when a script needs the\nanswer, and turns a typoed task id into a bounded failure instead of a hang.\n\n```console\n$ pueue-wait-cond 42 --timeout 300 --until ./deploy-is-live.sh\n09:20:07 - Waiting on 1 task(s): 42 (Running)\n09:20:07 - --until condition \"./deploy-is-live.sh\" exit 1\n09:20:09 - --until condition \"./deploy-is-live.sh\" satisfied; done waiting\n```\n\nThe normal output stays compatible with `pueue wait`. Add `--json` for one\nparseable result object, or `--task-grace forever` when you deliberately want\nthe old unbounded wait for a task id that has not appeared yet."
+                  }
+                }
+              }
+            }
+          ],
+          "properties": {
+            "tags": [
+              "rationale"
+            ],
+            "ext-ai-tool-confidence": 1
+          },
+          "rank": 85,
+          "workItemUris": [
+            "PWC-16"
+          ],
+          "partialFingerprints": {
+            "prNoteAnchor/v1": "8fe94dee90ccdd0bfb4a9a0d1375345c"
+          }
+        },
+        {
+          "ruleId": "review-note",
+          "ruleIndex": 0,
+          "kind": "informational",
+          "level": "none",
+          "guid": "msmlijbt8j3z3mth",
+          "message": {
+            "text": "Both machine-readable examples were regenerated from isolated real-daemon runs: the jq transcript resolved as until, and the full object preserves every key emitted by src/json.ts.",
+            "markdown": "Both machine-readable examples were regenerated from isolated real-daemon runs: the jq transcript resolved as `until`, and the full object preserves every key emitted by `src/json.ts`."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "README.md"
+                },
+                "region": {
+                  "startLine": 251,
+                  "endLine": 273,
+                  "snippet": {
+                    "text": "```console\n$ pueue-wait-cond 0 --json --until 'test -f /tmp/ready' | jq -r '.outcome, .elapsedMs'\nuntil\n1122\n```\n\n```json\n{\n  \"outcome\": \"reached\",\n  \"exitCode\": 0,\n  \"elapsedMs\": 13,\n  \"iterations\": 1,\n  \"targetStatus\": \"done\",\n  \"group\": null,\n  \"tasks\": [\n    { \"id\": 0, \"group\": \"default\", \"label\": null, \"command\": \"true\",\n      \"status\": \"Done\", \"result\": \"Success\", \"exitCode\": null }\n  ],\n  \"pendingIds\": [],\n  \"failedIds\": [],\n  \"condition\": null,\n  \"unknownIds\": []\n}"
+                  }
+                }
+              }
+            }
+          ],
+          "properties": {
+            "tags": [
+              "test-evidence"
+            ],
+            "ext-ai-tool-confidence": 1
+          },
+          "rank": 80,
+          "workItemUris": [
+            "PWC-16"
+          ],
+          "partialFingerprints": {
+            "prNoteAnchor/v1": "52f4acb559019630a0f9f2ab6c39e30f"
+          }
+        }
+      ],
+      "versionControlProvenance": [
+        {
+          "repositoryUri": "git@github.com:brianwestphal/pueue-wait-cond.git",
+          "revisionId": "b75ce3b246440682211bb2d71786eb0742bd9c8e",
+          "branch": "main"
+        }
+      ]
+    }
+  ]
+}

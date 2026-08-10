@@ -1,17 +1,23 @@
 # pueue-wait-cond
 
-`pueue wait`, plus **timeouts** and **script conditions**.
+`pueue wait`, plus **timeouts**, **script conditions**, and **machine-readable
+results**.
 
 [pueue](https://github.com/Nukesor/pueue) can wait for tasks to finish. It cannot
 give up after a while, and it cannot stop early because *something else* became
-true. `pueue-wait-cond` does both, while keeping every option and output line
-`pueue wait` already gives you.
+true. `pueue-wait-cond` does both, emits stable JSON when a script needs the
+answer, and turns a typoed task id into a bounded failure instead of a hang.
 
 ```console
 $ pueue-wait-cond 42 --timeout 300 --until ./deploy-is-live.sh
-09:20:07 - Task 42 changed from Queued to Running
-09:21:44 - --until condition "./deploy-is-live.sh" satisfied; done waiting
+09:20:07 - Waiting on 1 task(s): 42 (Running)
+09:20:07 - --until condition "./deploy-is-live.sh" exit 1
+09:20:09 - --until condition "./deploy-is-live.sh" satisfied; done waiting
 ```
+
+The normal output stays compatible with `pueue wait`. Add `--json` for one
+parseable result object, or `--task-grace forever` when you deliberately want
+the old unbounded wait for a task id that has not appeared yet.
 
 ## Install
 
@@ -243,21 +249,21 @@ Durations are seconds by default; `ms` / `s` / `m` / `h` suffixes also work
 can branch on the result rather than scraping progress lines:
 
 ```console
-$ pueue-wait-cond -g build --json --until ./ready.sh | jq -r '.outcome, .elapsedMs'
+$ pueue-wait-cond 0 --json --until 'test -f /tmp/ready' | jq -r '.outcome, .elapsedMs'
 until
-8231
+1122
 ```
 
 ```json
 {
   "outcome": "reached",
   "exitCode": 0,
-  "elapsedMs": 12500,
-  "iterations": 6,
+  "elapsedMs": 13,
+  "iterations": 1,
   "targetStatus": "done",
-  "group": "build",
+  "group": null,
   "tasks": [
-    { "id": 4, "group": "build", "label": null, "command": "make",
+    { "id": 0, "group": "default", "label": null, "command": "true",
       "status": "Done", "result": "Success", "exitCode": null }
   ],
   "pendingIds": [],
@@ -386,7 +392,8 @@ pueue-wait-cond -a --until ./healthy.sh --until ./cancelled.sh --timeout 120
 ## Differences from `pueue wait`
 
 - Extra options: `--timeout`, `--until`, `--while`, `--interval`,
-  `--condition-timeout`, `--fail-on-error`, `--pueue-binary`, `--shell`.
+  `--condition-timeout`, `--task-grace`, `--json`, `--fail-on-error`,
+  `--pueue-binary`, `--shell`.
 - `--status` accepts a **superset** of pueue's values (`stashed`, `paused`,
   `locked`, `failed` in addition to `queued`, `running`, `success`, `done`).
 - Waiting on a task id the daemon has never heard of **warns and keeps waiting
