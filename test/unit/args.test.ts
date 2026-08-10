@@ -3,6 +3,7 @@ import { describe, it } from 'node:test';
 
 import { helpText, parseCliArgs, parseDuration, UsageError } from '../../src/args.js';
 import type { Options } from '../../src/args.js';
+import { EXIT } from '../../src/exitCodes.js';
 
 function opts(argv: string[], env: NodeJS.ProcessEnv = {}): Options {
   const result = parseCliArgs(argv, env);
@@ -68,9 +69,11 @@ describe('parseCliArgs — help and version', () => {
   });
 
   it('documents every exit code in the help text', () => {
-    const text = helpText();
-    for (const code of ['0', '1', '2', '3', '4', '5', '6']) {
-      assert.match(text, new RegExp(`^ {2}${code} {2}`, 'm'), `exit code ${code}`);
+    const exitCodeBlock = helpText().split('\nExit codes:\n')[1];
+    assert.ok(exitCodeBlock, 'Exit codes block');
+
+    for (const code of Object.values(EXIT)) {
+      assert.match(exitCodeBlock, new RegExp(`^ {2}${code} {2}`, 'm'), `exit code ${code}`);
     }
   });
 });

@@ -205,6 +205,7 @@ Exit codes:
   5  pueue could not be reached or understood
   6  a condition script could not be executed
   7  named task ids never appeared (see --task-grace)
+  130  interrupted by SIGINT or SIGTERM
 `;
 }
 

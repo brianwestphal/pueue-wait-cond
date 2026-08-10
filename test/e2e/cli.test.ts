@@ -71,6 +71,16 @@ describe('e2e: help, version and usage', () => {
     assert.equal(run.stderr, '');
   });
 
+  it('documents every public exit code in the shipped help output', async () => {
+    const run = await runCli(['--help']);
+    const exitCodeBlock = run.stdout.split('\nExit codes:\n')[1];
+    assert.ok(exitCodeBlock, 'Exit codes block');
+
+    for (const code of Object.values(EXIT)) {
+      assert.match(exitCodeBlock, new RegExp(`^ {2}${code} {2}`, 'm'), `exit code ${code}`);
+    }
+  });
+
   it('documents inline shell commands, not just script paths', async () => {
     const run = await runCli(['--help']);
     assert.match(run.stdout, /INLINE SHELL\s+COMMAND/);

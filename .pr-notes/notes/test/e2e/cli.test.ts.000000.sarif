@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "Hot Sheet",
+          "rules": [
+            {
+              "id": "review-note",
+              "name": "ReviewNote",
+              "shortDescription": {
+                "text": "AI-authored, line-anchored review note."
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "review-note",
+          "ruleIndex": 0,
+          "kind": "informational",
+          "level": "none",
+          "guid": "msml3yl93tm72pg6",
+          "message": {
+            "text": "The shipped-binary test mirrors the unit contract at the observable CLI boundary, proving the generated dist help output contains every public exit code.",
+            "markdown": "The shipped-binary test mirrors the unit contract at the observable CLI boundary, proving the generated `dist` help output contains every public exit code."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "test/e2e/cli.test.ts"
+                },
+                "region": {
+                  "startLine": 74,
+                  "endLine": 81,
+                  "snippet": {
+                    "text": "  it('documents every public exit code in the shipped help output', async () => {\n    const run = await runCli(['--help']);\n    const exitCodeBlock = run.stdout.split('\\nExit codes:\\n')[1];\n    assert.ok(exitCodeBlock, 'Exit codes block');\n\n    for (const code of Object.values(EXIT)) {\n      assert.match(exitCodeBlock, new RegExp(`^ {2}${code} {2}`, 'm'), `exit code ${code}`);\n    }"
+                  }
+                }
+              }
+            }
+          ],
+          "properties": {
+            "tags": [
+              "test-evidence"
+            ],
+            "ext-ai-tool-confidence": 1
+          },
+          "rank": 75,
+          "workItemUris": [
+            "PWC-17"
+          ],
+          "partialFingerprints": {
+            "prNoteAnchor/v1": "90be186678b172566fc3a33a69b956e3"
+          }
+        }
+      ],
+      "versionControlProvenance": [
+        {
+          "repositoryUri": "git@github.com:brianwestphal/pueue-wait-cond.git",
+          "revisionId": "a459787671dc9a090e18b2bddd21b13a3c0b29d1",
+          "branch": "main"
+        }
+      ]
+    }
+  ]
+}
