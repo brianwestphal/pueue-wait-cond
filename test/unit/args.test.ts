@@ -231,7 +231,7 @@ describe('parseCliArgs — pueue plumbing', () => {
     assert.equal(o.pueueProfile, 'ci');
   });
 
-  it('defaults the shell to /bin/sh and honours --shell', () => {
+  it('defaults the shell to /bin/sh and honors --shell', () => {
     assert.equal(opts([]).shell, '/bin/sh');
     assert.equal(opts(['--shell', '/bin/bash']).shell, '/bin/bash');
   });

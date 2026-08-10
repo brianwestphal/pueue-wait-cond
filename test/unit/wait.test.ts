@@ -119,7 +119,7 @@ describe('missingIds / selectionGroup', () => {
 });
 
 describe('snapshotForConditions', () => {
-  it('summarises the selected tasks and the groups', () => {
+  it('summarizes the selected tasks and the groups', () => {
     const snapshot = makeSnapshot(
       [
         { id: 1, status: failed(3), label: 'a', command: 'make' },

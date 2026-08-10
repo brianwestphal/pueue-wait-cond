@@ -121,7 +121,7 @@ export function makeOptions(overrides: Partial<Options> = {}): Options {
     json: false,
     conditionTimeoutMs: 5_000,
     // Tests that care about the grace set it explicitly; `forever` keeps every
-    // other test on the pre-existing "tolerate unknown ids" behaviour.
+    // other test on the pre-existing "tolerate unknown ids" behavior.
     taskGraceMs: null,
     until: [],
     while: [],

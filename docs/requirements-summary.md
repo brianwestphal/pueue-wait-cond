@@ -33,7 +33,7 @@ Status markers: **Shipped** · **Partial** · **Design only** · **Deferred**
 | Req | Summary | Status |
 | --- | --- | --- |
 | R2.1 | State from `pueue status --json`; `--config`/`--profile` forwarded | Shipped |
-| R2.2 | Tagged-enum normalisation, defensive parsing | Shipped |
+| R2.2 | Tagged-enum normalization, defensive parsing | Shipped |
 | R2.3 | Selection recomputed every poll (picks up late tasks) | Shipped |
 | R2.4 | "Has reached" ordering; off-line states matched exactly | Shipped |
 | R2.5 | Unreachable `success`/`failed` targets exit `1` promptly | Shipped |
@@ -68,7 +68,7 @@ Status markers: **Shipped** · **Partial** · **Design only** · **Deferred**
 | R4.3 | `pueue wait`-compatible progress lines on stdout | Shipped |
 | R4.4 | Extra lines for conditions, timeout, completion; already-finished tasks still reported | Shipped |
 | R4.5 | Stream discipline (stdout progress / stderr diagnostics) | Shipped |
-| R4.6 | TTY colour, `NO_COLOR` > `FORCE_COLOR` | Shipped |
+| R4.6 | TTY color, `NO_COLOR` > `FORCE_COLOR` | Shipped |
 | R4.7 | `--json`: one result object on stdout, implies `--quiet` | Shipped |
 | R4.7.1 | Result shape; every key always present; no `envs` leak | Shipped |
 | R4.7.2 | Errors (usage/pueue/condition) emitted as JSON too | Shipped |
@@ -105,7 +105,7 @@ Every requirement above has both unit and E2E coverage, except:
 
 - **R2.9 (signals)** — covered by unit tests (in-process `process.emit`) and E2E
   against the stub daemon, but not against a real `pueued`.
-- **R4.6 (colour)** — unit tested; the E2E runs force `NO_COLOR`.
+- **R4.6 (color)** — unit tested; the E2E runs force `NO_COLOR`.
 
 ## Known gaps / follow-ups
 

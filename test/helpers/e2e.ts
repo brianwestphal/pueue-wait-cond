@@ -125,7 +125,7 @@ export class TestDaemon {
 
     await daemon.exec('pueued', ['-c', daemon.configPath, '-d']);
     await daemon.waitUntilReachable();
-    // One worker is not enough to observe queueing behaviour.
+    // One worker is not enough to observe queueing behavior.
     await daemon.pueue(['parallel', '4']);
     return daemon;
   }

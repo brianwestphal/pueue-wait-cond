@@ -15,17 +15,17 @@ the package free of runtime dependencies and of pueue-version coupling beyond
 `--config` and `--profile` are forwarded verbatim so the tool can target the
 same daemon the user's `pueue` would.
 
-## R2.2 — Status normalisation
+## R2.2 — Status normalization
 
-pueue serialises a task status as a serde-tagged enum: either a bare string
+pueue serializes a task status as a serde-tagged enum: either a bare string
 (`"Queued"`) or a single-key object (`{"Done": {"result": {"Failed": 7}}}`).
-Both shapes normalise to a flat record of `kind`, `result` and `exitCode`.
+Both shapes normalize to a flat record of `kind`, `result` and `exitCode`.
 
-Malformed or unrecognised payloads must not crash the wait:
+Malformed or unrecognized payloads must not crash the wait:
 
 - a task entry that is not an object, or has no numeric `id`, is skipped;
 - missing `group`/`label`/`command` fall back to `default`/`null`/`""`;
-- an unrecognised status or result variant becomes `Unknown` / `null`;
+- an unrecognized status or result variant becomes `Unknown` / `null`;
 - a `Failed` payload that is not a number yields a `null` exit code.
 
 A payload that is not an object, or that has no `tasks` object, **is** an error
@@ -76,7 +76,7 @@ waiting for `--task-grace` (default 5s)**, then gives up with exit `7`.
 
 This is the compromise between two bad options. Failing immediately would lose a
 real race — `pueue add` followed straight by a wait can legitimately observe the
-daemon before the task is visible. Waiting forever (the behaviour up to 0.1.0)
+daemon before the task is visible. Waiting forever (the behavior up to 0.1.0)
 turned a typo'd id, or one `pueue clean` had removed, into a silent hang unless
 the user happened to pass `--timeout`.
 
@@ -89,7 +89,7 @@ shorter than a human will tolerate staring at a hung command.
 | --- | --- |
 | a duration | tolerate absence for that long (default `5`) |
 | `0` | fail on the first snapshot that lacks the id |
-| `forever` | never give up — the pre-0.1.1 behaviour |
+| `forever` | never give up — the pre-0.1.1 behavior |
 
 The grace is a **floor, not a deadline**: it is evaluated at poll boundaries, so
 the actual give-up time is the first poll at or after it elapses. With the

@@ -110,7 +110,7 @@ export function selectionGroup(options: Options): string | null {
 }
 
 /**
- * Serialise the snapshot for condition scripts.
+ * Serialize the snapshot for condition scripts.
  *
  * pueue embeds each task's whole environment in `status --json`, which is both
  * enormous and full of secrets; conditions get the useful fields instead.

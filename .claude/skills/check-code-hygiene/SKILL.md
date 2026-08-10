@@ -148,7 +148,7 @@ For each finding:
 - **Description**: what the issue is
 - **Suggestion**: how to fix it
 
-End with a prioritised summary of the top 10 most impactful improvements — or
+End with a prioritized summary of the top 10 most impactful improvements — or
 fewer. This is a small, deliberately conservative codebase; expect **0–5 in a
 healthy state**, and do not pad the list to look thorough. Suggest filing Hot
 Sheet tickets (`hs-task` for cleanups, `hs-bug` for real defects) for anything

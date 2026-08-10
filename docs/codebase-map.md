@@ -35,7 +35,7 @@ any conflict — fix this file when it drifts.
 │       ├── cli.test.ts          # shipped binary vs a stub `pueue`
 │       └── daemon.test.ts       # shipped binary vs a real, isolated `pueued`
 ├── docs/
-│   ├── requirements/01..05-*.md # source of truth for behaviour
+│   ├── requirements/01..05-*.md # source of truth for behavior
 │   ├── codebase-map.md          # this file
 │   ├── requirements-summary.md
 │   └── manual-test-plan.md

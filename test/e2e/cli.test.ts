@@ -169,7 +169,7 @@ describe('e2e: waiting', () => {
     assert.equal(run.code, EXIT.TASK_FAILURE);
   });
 
-  it('honours --group', async () => {
+  it('honors --group', async () => {
     const binary = stubPueue('group', [
       tasks([
         { id: 1, status: doneOk, group: 'build' },
@@ -180,7 +180,7 @@ describe('e2e: waiting', () => {
     assert.equal(run.code, EXIT.OK);
   });
 
-  it('honours --status running', async () => {
+  it('honors --status running', async () => {
     const binary = stubPueue('status-running', [
       tasks([{ id: 1, status: 'Queued' }]),
       tasks([{ id: 1, status: { Running: {} } }]),

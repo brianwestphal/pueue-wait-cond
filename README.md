@@ -386,7 +386,7 @@ pueue-wait-cond -g ci --status success || echo "the build did not pass"
 Stop as soon as *any* of several things becomes true:
 
 ```sh
-pueue-wait-cond -a --until ./healthy.sh --until ./cancelled.sh --timeout 120
+pueue-wait-cond -a --until ./healthy.sh --until ./canceled.sh --timeout 120
 ```
 
 ## Differences from `pueue wait`

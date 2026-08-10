@@ -71,9 +71,9 @@ identical snapshots produce no output.
 Errors are printed even under `--quiet`; warnings and condition output are not.
 Under `--json` errors move to stdout as objects (R4.7.2) and stderr stays empty.
 
-## R4.6 — Colour
+## R4.6 — Color
 
-Colour is used only when stdout is a TTY. `NO_COLOR` (non-empty) disables it
+Color is used only when stdout is a TTY. `NO_COLOR` (non-empty) disables it
 unconditionally; `FORCE_COLOR` (non-empty, not `0`) enables it without a TTY.
 `NO_COLOR` wins over `FORCE_COLOR`.
 

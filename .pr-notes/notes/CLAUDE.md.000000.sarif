@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "Hot Sheet",
+          "rules": [
+            {
+              "id": "review-note",
+              "name": "ReviewNote",
+              "shortDescription": {
+                "text": "AI-authored, line-anchored review note."
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "review-note",
+          "ruleIndex": 0,
+          "kind": "informational",
+          "level": "none",
+          "guid": "msmm3nvchcu1ex2b",
+          "message": {
+            "text": "The repository-wide rule covers every maintained prose surface so future changes do not reintroduce mixed regional spelling. The exception is deliberately narrow: externally defined text and identifiers must remain exact to preserve compatibility and faithful quotations.",
+            "markdown": "The repository-wide rule covers every maintained prose surface so future changes do not reintroduce mixed regional spelling. The exception is deliberately narrow: externally defined text and identifiers must remain exact to preserve compatibility and faithful quotations."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "CLAUDE.md"
+                },
+                "region": {
+                  "startLine": 24,
+                  "endLine": 28,
+                  "snippet": {
+                    "text": "\n- Use American English in all repository-authored prose, including documentation, user-facing output, source comments, test names, commit messages, and workflow guidance. Prefer forms such as `behavior`, `color`, `normalize`, `serialize`, and `recognize`. Preserve another spelling only when an external API, command output, identifier, proper name, or verbatim quotation requires it.\n\n<!-- hotsheet:begin section=testing-philosophy v=2 -->\n## Testing Philosophy"
+                  }
+                }
+              }
+            }
+          ],
+          "properties": {
+            "tags": [
+              "rationale"
+            ],
+            "ext-ai-tool-confidence": 0.98
+          },
+          "rank": 70,
+          "workItemUris": [
+            "PWC-19"
+          ],
+          "partialFingerprints": {
+            "prNoteAnchor/v1": "a17fd4bb11411982fea85675f5d8a1bd"
+          }
+        }
+      ],
+      "versionControlProvenance": [
+        {
+          "repositoryUri": "git@github.com:brianwestphal/pueue-wait-cond.git",
+          "revisionId": "272dc4b9031d9d17ea007b4017517b9dfc0ed4be",
+          "branch": "main"
+        }
+      ]
+    }
+  ]
+}

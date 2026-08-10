@@ -70,7 +70,7 @@ Keep the established voice: direct, concrete, a little dry. American English
 throughout. **Never put a `PWC-NN` ticket marker in the README** — it is a
 published surface and readers have no Hot Sheet. Write self-contained prose.
 
-When a README change touches a behaviour claim, make sure the corresponding
+When a README change touches a behavior claim, make sure the corresponding
 `docs/requirements/` page and the two summary docs still agree. Flag drift you
 cannot fix in scope as a follow-up ticket rather than fixing it silently.
 
@@ -113,7 +113,7 @@ major release is when they actually matter.
    table rather than staying on the maintainer's list.
 2. **Work out which items this release actually needs.** Do not hand over the
    whole list by default; select by what changed:
-   - touched `src/reporter.ts` or any output → **M1** (colour), **M4** (narrow
+   - touched `src/reporter.ts` or any output → **M1** (color), **M4** (narrow
      terminal), and Part 2 above
    - touched signal handling or `src/cli.ts` `main()` → **M2** (Ctrl-C)
    - touched `src/pueue.ts` or buffering → **M3** (very large daemon state)

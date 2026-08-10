@@ -24,7 +24,7 @@ export interface Options {
   conditionTimeoutMs: number;
   /**
    * How long a named task id may be absent from pueue before the wait gives up.
-   * `null` means tolerate it forever (the pre-0.1.1 behaviour).
+   * `null` means tolerate it forever (the pre-0.1.1 behavior).
    */
   taskGraceMs: number | null;
   until: string[];
@@ -293,7 +293,7 @@ export function parseCliArgs(argv: string[], env: NodeJS.ProcessEnv = process.en
     throw new UsageError('--condition-timeout must be greater than zero');
   }
 
-  // `forever` restores the pre-0.1.1 behaviour of tolerating an unknown id
+  // `forever` restores the pre-0.1.1 behavior of tolerating an unknown id
   // indefinitely; `0` fails on the first snapshot that lacks it.
   const graceRaw = values['task-grace'];
   const taskGraceMs =

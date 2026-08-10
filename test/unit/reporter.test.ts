@@ -25,12 +25,12 @@ describe('shouldUseColor', () => {
     assert.equal(shouldUseColor({}, {}), false);
   });
 
-  it('honours NO_COLOR over everything', () => {
+  it('honors NO_COLOR over everything', () => {
     assert.equal(shouldUseColor({ isTTY: true }, { NO_COLOR: '1' }), false);
     assert.equal(shouldUseColor({ isTTY: true }, { NO_COLOR: '', FORCE_COLOR: '1' }), true);
   });
 
-  it('honours FORCE_COLOR without a TTY', () => {
+  it('honors FORCE_COLOR without a TTY', () => {
     assert.equal(shouldUseColor({ isTTY: false }, { FORCE_COLOR: '1' }), true);
     assert.equal(shouldUseColor({ isTTY: false }, { FORCE_COLOR: '0' }), false);
     assert.equal(shouldUseColor({ isTTY: false }, { FORCE_COLOR: '' }), false);
@@ -109,7 +109,7 @@ describe('Reporter', () => {
     assert.match(out.text, /changed from Success to Failed\(1\)\n$/);
   });
 
-  it('summarises the tasks being watched', () => {
+  it('summarizes the tasks being watched', () => {
     const { out, reporter } = makeReporter();
     reporter.watching([task({ id: 1, kind: 'Queued' }), task({ id: 2, kind: 'Running' })]);
     assert.match(out.text, /Waiting on 2 task\(s\): 1 \(Queued\), 2 \(Running\)\n$/);
@@ -188,7 +188,7 @@ describe('Reporter', () => {
     assert.equal(err.text, 'an error\n');
   });
 
-  it('emits ANSI codes only when colour is on', () => {
+  it('emits ANSI codes only when color is on', () => {
     const plain = new StringWriter();
     const colored = new StringWriter();
     const at = () => new Date(2026, 0, 1, 12, 0, 0);

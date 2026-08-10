@@ -2,9 +2,9 @@
  * Model of the `pueue status --json` payload, plus the status matching rules
  * used to decide when a task has "reached" the status we are waiting for.
  *
- * pueue serialises a task's status as a serde-tagged enum, which comes out as
+ * pueue serializes a task's status as a serde-tagged enum, which comes out as
  * either a bare string (`"Queued"`) or a single-key object
- * (`{ "Done": { "result": "Success", ... } }`). We normalise both shapes into a
+ * (`{ "Done": { "result": "Success", ... } }`). We normalize both shapes into a
  * flat {@link TaskState}.
  */
 
@@ -26,7 +26,7 @@ export function isTargetStatus(value: string): value is TargetStatus {
   return (TARGET_STATUSES as readonly string[]).includes(value);
 }
 
-/** Normalised, flattened view of a pueue task status. */
+/** Normalized, flattened view of a pueue task status. */
 export interface TaskState {
   id: number;
   group: string;

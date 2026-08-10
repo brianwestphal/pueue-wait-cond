@@ -50,10 +50,10 @@ comprehensive report.
    coverage* and flag any regression.
 
    **Coverage is a floor, not a ceiling.** 100% line coverage proves every line
-   *executed* — not that every *behaviour*, or every *sequence* of behaviours, is
+   *executed* — not that every *behavior*, or every *sequence* of behaviors, is
    *asserted*. It is structurally blind to a missing state transition. Do NOT
    treat a green coverage report as proof of correctness — treat it as the
-   trigger for the behavioural audit in step 6.
+   trigger for the behavioral audit in step 6.
 
    Uncovered lines that are genuinely unreachable defensive guards are not
    findings, but each one should be *justified*. If you find an uncovered branch
@@ -124,7 +124,7 @@ comprehensive report.
      particularly status/enum unpacking outside `src/status.ts`, or a second
      place that formats a task for output.
 
-6. **Behavioural / state-transition audit** (the step coverage cannot do for you)
+6. **Behavioral / state-transition audit** (the step coverage cannot do for you)
 
    `CLAUDE.md` § *Testing Philosophy* mandates transition-matrix testing for
    stateful modules. This step audits it.
@@ -192,9 +192,9 @@ comprehensive report.
 - **Type Issues**: grouped by file.
 - **Anti-Pattern Violations**: file + line, severity (high/medium/low), one-line
   fix each. Dependency creep and secret leakage are always high.
-- **Behavioural / State-Transition Audit**: per stateful module — its states,
+- **Behavioral / State-Transition Audit**: per stateful module — its states,
   whether the transition matrix is exercised, and any gap with the concrete
   adversarial sequences to add. **Required even when coverage is 100%.**
 - **Build & Package Shape**: pass/fail per check from step 7.
-- **Recommendations**: prioritised. File Hot Sheet tickets (`hs-task` for
+- **Recommendations**: prioritized. File Hot Sheet tickets (`hs-task` for
   cleanups, `hs-bug` for real defects) for anything non-trivial.

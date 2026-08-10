@@ -1,13 +1,13 @@
 # Manual test plan
 
-For behaviour that automated tests cannot reliably cover. Keep this current: add
+For behavior that automated tests cannot reliably cover. Keep this current: add
 items when you ship something unautomatable, and when you later automate one,
 delete it here and note it under **Automated coverage summary**.
 
 Prerequisites: `npm run build`, a running `pueued`, and `alias pwc="node
 $(pwd)/bin/pueue-wait-cond.js"`.
 
-## M1 — Colour in a real terminal
+## M1 — Color in a real terminal
 
 Automated tests force `NO_COLOR`, so the actual escape sequences are never seen
 by a human.
@@ -17,9 +17,9 @@ by a human.
    `succeeded` in green; the "Waiting on…" line is dim.
 3. `NO_COLOR=1 pwc <id>` → no escape sequences.
 4. `pwc <id> | cat` → no escape sequences (not a TTY).
-5. `FORCE_COLOR=1 pwc <id> | cat` → colour present despite the pipe.
+5. `FORCE_COLOR=1 pwc <id> | cat` → color present despite the pipe.
 
-**Expected:** colour only in cases 2 and 5.
+**Expected:** color only in cases 2 and 5.
 
 ## M2 — Ctrl-C ergonomics
 
@@ -107,7 +107,7 @@ Previously-manual checks now covered automatically:
 | Isolation from the developer's own pueue daemon | `test/helpers/e2e.ts` `TestDaemon` |
 | SIGINT / SIGTERM exit code | `test/e2e/cli.test.ts`, `test/unit/main.test.ts` |
 | Condition SIGTERM → SIGKILL escalation | `test/unit/condition.test.ts` |
-| Colour gating logic (not the rendering) | `test/unit/reporter.test.ts` |
+| Color gating logic (not the rendering) | `test/unit/reporter.test.ts` |
 | Large `pueue status --json` payloads (~8 MB) | `test/unit/pueue.test.ts` |
 | Linux, and Node 20 vs 22 | CI matrix (`.github/workflows/ci.yml`) |
 | "did the E2E suite actually run?" | `PWC_REQUIRE_PUEUE=1` precondition test |

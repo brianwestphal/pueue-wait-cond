@@ -20,6 +20,10 @@ When the user gives you work directly (not via the Hot Sheet channel or events),
 - Do not leave completed work uncommitted at handoff unless the user explicitly
   asks for an uncommitted diff. Never push without explicit permission.
 
+## Language and Style
+
+- Use American English in all repository-authored prose, including documentation, user-facing output, source comments, test names, commit messages, and workflow guidance. Prefer forms such as `behavior`, `color`, `normalize`, `serialize`, and `recognize`. Preserve another spelling only when an external API, command output, identifier, proper name, or verbatim quotation requires it.
+
 <!-- hotsheet:begin section=testing-philosophy v=2 -->
 ## Testing Philosophy
 
@@ -36,7 +40,7 @@ When the user gives you work directly (not via the Hot Sheet channel or events),
 <!-- hotsheet:begin specifics=testing-philosophy v=1 -->
 ### This project's test setup
 - **Unit tests** (`test/unit/*.test.ts`): Node's built-in runner (`node --import tsx --test`) with `node:assert/strict`. Always use the shared fakes in `test/helpers/fakes.ts` — `makeSnapshot()` (builds a raw `pueue status --json` payload and parses it through the real parser), `ScriptedClient` (walks a list of snapshots; throws if the wait loop polls far past the script, since tests inject a no-op `sleep` and a non-converging loop would otherwise spin forever), `makeOptions()`, `makeReporter()`, `StringWriter`, `fakeSleep()`.
-- **E2E tests** (`test/e2e/*.test.ts`): same runner, `--test-concurrency=1`, driving the **shipped** `bin/pueue-wait-cond.js` as a child process via `runCli()` in `test/helpers/e2e.ts`. Two flavours: `cli.test.ts` against a **stub** `pueue` shell script (deterministic exit codes/output), and `daemon.test.ts` against a **real** `pueued` that `TestDaemon` starts in a temp dir with its own socket and state — never the developer's daemon. They skip if `pueue`/`pueued` aren't installed. Note: unix sockets are blocked under the command sandbox, so the real-daemon suite must run unsandboxed.
+- **E2E tests** (`test/e2e/*.test.ts`): same runner, `--test-concurrency=1`, driving the **shipped** `bin/pueue-wait-cond.js` as a child process via `runCli()` in `test/helpers/e2e.ts`. Two flavors: `cli.test.ts` against a **stub** `pueue` shell script (deterministic exit codes/output), and `daemon.test.ts` against a **real** `pueued` that `TestDaemon` starts in a temp dir with its own socket and state — never the developer's daemon. They skip if `pueue`/`pueued` aren't installed. Note: unix sockets are blocked under the command sandbox, so the real-daemon suite must run unsandboxed.
 - **Commands**: unit `npm run test:unit` · E2E `npm run test:e2e` (builds first) · both `npm test` · merged coverage `npm run coverage` (c8, shared `--temp-directory .tmp-coverage`, report in `coverage/`) · also `npm run lint` and `npm run typecheck`.
 <!-- hotsheet:end specifics=testing-philosophy -->
 <!-- hotsheet:end section=testing-philosophy -->

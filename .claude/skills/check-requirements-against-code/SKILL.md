@@ -21,7 +21,7 @@ discrepancies.
    ```
    It was `01`–`05` when this skill was written. Requirements are numbered
    `RN.M` (and `RN.M.K`) so they can be cited; note every stated requirement,
-   behaviour and constraint.
+   behavior and constraint.
 
 2. **For each requirement, verify it against the implementation.** Everything
    lives under `src/`. Note differences, missing features, and extra features not
@@ -51,15 +51,15 @@ discrepancies.
    the `README.md` exit-code table, and the `Exit codes:` block in `helpText()`
    all list the same codes with the same meanings.
 
-5. **Check for undocumented behaviour.** Scan `src/` for observable behaviour not
+5. **Check for undocumented behavior.** Scan `src/` for observable behavior not
    covered by any requirement — a new flag, a new exit code, a new environment
    variable, a new field in the `--json` object or the condition snapshot. These
    should either be specified in `docs/requirements/` or questioned.
 
-6. **Check for stale documentation.** Requirements describing behaviour that no
+6. **Check for stale documentation.** Requirements describing behavior that no
    longer exists. Pay attention to anything marked **Partial** or **Design only**
-   in the summary that has since shipped, and to behaviour that changed
-   deliberately (e.g. unknown task ids used to wait forever; they now honour
+   in the summary that has since shipped, and to behavior that changed
+   deliberately (e.g. unknown task ids used to wait forever; they now honor
    `--task-grace`).
 
 7. **Verify `CLAUDE.md` completeness.** Its two "This project's …" blocks are the
@@ -82,7 +82,7 @@ discrepancies.
      including the return type of `waitForConditions` and the full
      `WaitOutcome` union.
    - **Data model** matches `src/status.ts`.
-   - **Tests table** matches the real suites and their skip behaviour.
+   - **Tests table** matches the real suites and their skip behavior.
    - **Settings / configuration keys** lists every environment variable actually
      read (`PUEUE_BINARY`, `NO_COLOR`, `FORCE_COLOR`, `PWC_REQUIRE_PUEUE`) plus
      the `PUEUE_WAIT_*` set conditions receive.
@@ -129,7 +129,7 @@ For each:
 
 For doc-vs-doc drift, recommend updating both to match the canonical source —
 `src/args.ts` for the option list, `src/exitCodes.ts` for exit codes, the
-numbered requirement docs for behaviour, `package.json` for scripts and
+numbered requirement docs for behavior, `package.json` for scripts and
 packaging.
 
 ### Contract Audits
@@ -149,7 +149,7 @@ packaging.
 ### Questions
 
 List ambiguous requirements where the implementation had to make a judgment
-call, and ask whether the current behaviour is correct.
+call, and ask whether the current behavior is correct.
 
 ### Summary
 

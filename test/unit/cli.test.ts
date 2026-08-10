@@ -111,7 +111,7 @@ describe('run — wiring', () => {
     assert.equal(quiet.stdout, '');
   });
 
-  it('suppresses colour when NO_COLOR is set', async () => {
+  it('suppresses color when NO_COLOR is set', async () => {
     const { stdout } = await cli([], undefined, { NO_COLOR: '1', FORCE_COLOR: '1', PATH: '' });
     assert.equal(stdout.includes('['), false);
   });
@@ -175,7 +175,7 @@ describe('run — outcomes', () => {
     assert.equal(code, EXIT.INTERRUPTED);
   });
 
-  it('rethrows anything it does not recognise', async () => {
+  it('rethrows anything it does not recognize', async () => {
     await assert.rejects(cli([], [new RangeError('boom')]), RangeError);
   });
 

@@ -90,7 +90,7 @@ export function buildJsonError(kind: JsonErrorKind, message: string, exitCode: n
   return { outcome: 'error', exitCode, error: { kind, message } };
 }
 
-/** Serialise for stdout. Pretty-printed: these are read by humans too. */
+/** Serialize for stdout. Pretty-printed: these are read by humans too. */
 export function renderJson(value: JsonResult | JsonError): string {
   return `${JSON.stringify(value, null, 2)}\n`;
 }

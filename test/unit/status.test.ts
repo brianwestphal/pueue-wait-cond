@@ -64,7 +64,7 @@ describe('parseSnapshot', () => {
     assert.equal(snap.tasks.get(6)?.result, 'DependencyFailed');
   });
 
-  it('ignores a result variant it cannot recognise', () => {
+  it('ignores a result variant it cannot recognize', () => {
     const snap = parseSnapshot({
       tasks: { a: { id: 1, status: { Done: { result: { A: 1, B: 2 } } } } },
     });

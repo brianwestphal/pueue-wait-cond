@@ -113,13 +113,13 @@ the base tag and HEAD.
      commit prose.
    - **Honest size** — the area split, with a **product-only** total called out
      separately from the raw total. Name the biggest bucket. Docs and the
-     `.claude`/`.agents`/`.gemini`/`.hotsheet` scaffolding are explicitly labelled
+     `.claude`/`.agents`/`.gemini`/`.hotsheet` scaffolding are explicitly labeled
      non-engineering.
    - **Baseline note** — one line on what already shipped at the base, so nothing
      pre-existing reads as new.
    - **Per-change sections** for the genuine deltas, each carrying its diff
      evidence (new files, the option/exit-code delta, `0 hits → present` for
-     behaviour, measured test counts). Order by significance: a new CLI flag or
+     behavior, measured test counts). Order by significance: a new CLI flag or
      exit code before a doc sync.
    - **Contract changes** — a dedicated section whenever exit codes, CLI options,
      the `--json` shape, or the condition environment changed. Those are the

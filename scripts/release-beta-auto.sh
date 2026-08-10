@@ -39,7 +39,7 @@ cd "$(dirname "$0")/.."
 
 CHANGELOG="CHANGELOG.md"
 
-# Colours off on a non-tty so captured logs stay readable.
+# Colors off on a non-tty so captured logs stay readable.
 if [[ -t 1 ]]; then
   BOLD="\033[1m"; DIM="\033[2m"; GREEN="\033[32m"; YELLOW="\033[33m"
   RED="\033[31m"; CYAN="\033[36m"; RESET="\033[0m"
