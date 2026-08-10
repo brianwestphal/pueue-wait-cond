@@ -8,7 +8,11 @@ coverage/
 
 # Hot Sheet's local working state: sqlite db, telemetry, multi-MB snapshots,
 # rolling backups, and secret.json (a live API secret). None of it is source.
-.hotsheet/
+# settings.json is the exception — shared project config (ticket prefix,
+# auto-context, custom commands) that belongs in the repo. settings.local.json
+# stays out: it holds machine-specific paths and UI state.
+/.hotsheet/*
+!/.hotsheet/settings.json
 
 # Release script progress (resumable state), never committed.
 .release-state.json

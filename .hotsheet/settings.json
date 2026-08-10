@@ -1,0 +1,201 @@
+{
+  "appName": "pueue-wait-cond",
+  "ticketPrefix": "PWC",
+  "aiReviewNotes": true,
+  "auto_context": [
+    {
+      "type": "category",
+      "key": "feature",
+      "text": "Read docs/codebase-map.md and docs/requirements-summary.md if you haven't yet or if you feel you might be out-of-date.\n\nAdd or extend a requirements document under docs/requirements/, using the RN.M numbering so the requirement can be cited.\n\nA new CLI flag lives in THREE places that must agree: helpText() in src/args.ts, the README option table, and the requirements doc. Update all three in the same change.\n\nAsk clarifying questions as needed.\n\nBe sure to create follow up tickets as needed as well."
+    },
+    {
+      "type": "category",
+      "key": "requirement_change",
+      "text": "Read docs/codebase-map.md and docs/requirements-summary.md if you haven't yet or if you feel you might be out-of-date.\n\nUpdate the requirements documents under docs/requirements/ as appropriate, and keep docs/requirements-summary.md in step.\n\nIf the change touches a flag, an exit code, or the --json shape, remember those are published contracts — README, helpText() and the requirements doc all have to move together.\n\nAsk clarifying questions as needed.\n"
+    },
+    {
+      "type": "category",
+      "key": "bug",
+      "text": "Read docs/codebase-map.md and docs/requirements-summary.md if you haven't yet or if you feel you might be out-of-date.\n\nAdd both a unit test and, where the bug is observable through the CLI, an E2E test — double coverage is the house rule.\n\nIf the bug lives in a stateful path (the wait loop especially), pin it with a multi-step sequence test rather than a single-operation one: that is the gap line coverage is blind to.\n"
+    },
+    {
+      "type": "category",
+      "key": "task",
+      "text": "Make sure you understand the surrounding context before starting. Note anything left incomplete as a follow-up ticket."
+    },
+    {
+      "type": "category",
+      "key": "investigation",
+      "text": "Read docs/codebase-map.md first — its \"Where do I look for X\" index and \"Gotchas discovered the hard way\" section are usually the fastest way in.\n\nWrite up what you find as notes on this ticket, and add any durable, hard-won fact to the gotchas section of the codebase map.\n"
+    },
+    {
+      "type": "tag",
+      "key": "fable",
+      "text": "Use a subagent running the Fable model for this ticket."
+    }
+  ],
+  "custom_commands": [
+    {
+      "name": "Commit Changes",
+      "prompt": "make a commit message for the recently completed tickets, without wrapping long lines.  Don't include any co-authored by Anthropic type lines in the commit message.  add all unstaged changes to the git commit.  git commit with the message you generated but don't push",
+      "icon": "send",
+      "color": "#3b82f6",
+      "id": "6f1a2c84-1b7d-4a2e-9c31-8d5f0b2a7e10"
+    },
+    {
+      "name": "Update Requirements",
+      "prompt": "Update the requirements docs as appropriate",
+      "icon": "file-text",
+      "color": "#6b7280",
+      "id": "b3c9d5e2-7a41-4f68-9b02-1e6c4a8d3f52"
+    },
+    {
+      "type": "group",
+      "name": "Quality",
+      "children": [
+        {
+          "name": "Reqs ↔︎ Code",
+          "prompt": "/check-requirements-against-code",
+          "icon": "arrow-left-right",
+          "color": "#ec4899",
+          "id": "a17e4b90-3c52-4d81-b6fa-72c9e05d1834"
+        },
+        {
+          "name": "Check Code Hygene",
+          "prompt": "/check-code-hygiene",
+          "icon": "soap-dispenser-droplet",
+          "color": "#f97316",
+          "id": "c48d1f36-9e07-4b25-83ca-5d1b7f6a2098"
+        },
+        {
+          "name": "Analyze Code Quality",
+          "prompt": "/analyze-code-quality",
+          "icon": "circle-check-big",
+          "color": "#8b5cf6",
+          "id": "d92b7c05-6a3f-4e19-9d74-0b8e3c5a1f67"
+        },
+        {
+          "name": "Everything",
+          "prompt": "do these sequentially, creating follow up tickets for all concerns encountered:\n/check-requirements-against-code\n/check-code-hygiene\n/analyze-code-quality\n",
+          "icon": "balloon",
+          "color": "#e5e7eb",
+          "id": "e5f3a821-4d96-47b0-8c1e-9a2d6b7f0453"
+        }
+      ],
+      "id": "f70c9a13-8b24-4e5d-a931-6c0f2e8b5d47"
+    },
+    {
+      "type": "group",
+      "name": "GIT",
+      "children": [
+        {
+          "name": "git status",
+          "prompt": "git status",
+          "icon": "git-compare",
+          "color": "#e5e7eb",
+          "target": "shell",
+          "autoShowLog": true,
+          "id": "1a8b3c47-5d92-4f06-b8e1-3c7a9d0f2e56"
+        },
+        {
+          "name": "git push",
+          "prompt": "git push",
+          "icon": "git-compare-arrows",
+          "target": "shell",
+          "id": "2b9c4d58-6e03-4a17-c9f2-4d8b0e1a3f67"
+        }
+      ],
+      "id": "3c0d5e69-7f14-4b28-d0a3-5e9c1f2b4a78"
+    },
+    {
+      "type": "group",
+      "name": "Release",
+      "children": [
+        {
+          "name": "Technical Changelog",
+          "prompt": "/technical-changelog",
+          "icon": "file-diff",
+          "color": "#0ea5e9",
+          "id": "4d1e6f70-8025-4c39-e1b4-6f0d2a3c5b89"
+        },
+        {
+          "name": "Prep Major Release",
+          "prompt": "/prep-major-release",
+          "icon": "wand",
+          "color": "#14b8a6",
+          "id": "5e2f7081-9136-4d4a-f2c5-70e1b3d4c69a"
+        },
+        {
+          "name": "Release (beta)",
+          "prompt": "npm run release:beta",
+          "target": "shell",
+          "icon": "flask-conical",
+          "color": "#f59e0b",
+          "launchInNewTerminal": true,
+          "id": "6f308192-a247-4e5b-03d6-81f2c4e5d7ab"
+        },
+        {
+          "name": "Release",
+          "prompt": "npm run release",
+          "target": "shell",
+          "icon": "rocket",
+          "color": "#22c55e",
+          "launchInNewTerminal": true,
+          "id": "704192a3-b358-4f6c-14e7-92a3d5f6e8bc"
+        }
+      ],
+      "id": "8152a3b4-c469-4a7d-25f8-a3b4e6a7f9cd"
+    },
+    {
+      "type": "group",
+      "name": "Checks",
+      "children": [
+        {
+          "name": "Unit",
+          "prompt": "npm run test:unit",
+          "target": "shell",
+          "icon": "flask-round",
+          "color": "#e5e7eb",
+          "autoShowLog": true,
+          "id": "9263b4c5-d57a-4b8e-36a9-b4c5f7b8a0de"
+        },
+        {
+          "name": "E2E",
+          "prompt": "PWC_REQUIRE_PUEUE=1 npm run test:e2e",
+          "target": "shell",
+          "icon": "container",
+          "color": "#e5e7eb",
+          "autoShowLog": true,
+          "id": "a374c5d6-e68b-4c9f-47ba-c5d608c9b1ef"
+        },
+        {
+          "name": "Lint + Types",
+          "prompt": "npm run lint && npm run typecheck",
+          "target": "shell",
+          "icon": "spell-check",
+          "color": "#e5e7eb",
+          "autoShowLog": true,
+          "id": "b485d6e7-f79c-4d0a-58cb-d6e719dac2f0"
+        },
+        {
+          "name": "Coverage",
+          "prompt": "npm run coverage",
+          "target": "shell",
+          "icon": "percent",
+          "color": "#e5e7eb",
+          "autoShowLog": true,
+          "id": "c596e7f8-08ad-4e1b-69dc-e7f82aebd301"
+        }
+      ],
+      "id": "d6a7f809-19be-4f2c-7aed-f8093bfce412"
+    }
+  ],
+  "terminals": [
+    {
+      "id": "claude",
+      "name": "AI",
+      "command": "{{aiCommand}}",
+      "lazy": true
+    }
+  ]
+}
