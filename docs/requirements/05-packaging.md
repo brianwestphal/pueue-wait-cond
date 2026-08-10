@@ -47,9 +47,9 @@ meaningful on Windows — see the closed Hot Sheet ticket HS-6.
 
 ## R5.3 — Published contents
 
-`files` ships `bin/`, `dist/src/`, `README.md` and `LICENSE` — sources, tests
-and configs stay out of the tarball. `prepack` runs the build, so publishing
-cannot ship stale output.
+`files` ships `bin/`, `dist/src/`, `README.md`, `CHANGELOG.md` and `LICENSE` —
+sources, tests and configs stay out of the tarball. `prepack` runs the build, so
+publishing cannot ship stale output.
 
 ## R5.4 — Programmatic use
 

@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "Hot Sheet",
+          "rules": [
+            {
+              "id": "review-note",
+              "name": "ReviewNote",
+              "shortDescription": {
+                "text": "AI-authored, line-anchored review note."
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "review-note",
+          "ruleIndex": 0,
+          "kind": "informational",
+          "level": "none",
+          "guid": "msmjgit88o36u00x",
+          "message": {
+            "text": "The recorded coverage figures come from the PWC-15 merged c8 run: 99.76% statements, 98.09% branches, and 100% functions.",
+            "markdown": "The recorded coverage figures come from the PWC-15 merged c8 run: 99.76% statements, 98.09% branches, and 100% functions."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "docs/requirements-summary.md"
+                },
+                "region": {
+                  "startLine": 95,
+                  "endLine": 98,
+                  "snippet": {
+                    "text": "Merged unit + E2E: **99.76% statements, 98.09% branches, 100% functions**. The\nuncovered residue is defensive guards that cannot be reached through the public\nsurface (rethrow arms for errors the callee never raises, a best-effort temp-dir\ncleanup `catch`)."
+                  }
+                }
+              }
+            }
+          ],
+          "properties": {
+            "tags": [
+              "test-evidence"
+            ],
+            "ext-ai-tool-confidence": 1
+          },
+          "rank": 70,
+          "workItemUris": [
+            "PWC-15"
+          ],
+          "partialFingerprints": {
+            "prNoteAnchor/v1": "95b3112922bc879e9a09befdb7c80926"
+          }
+        }
+      ],
+      "versionControlProvenance": [
+        {
+          "repositoryUri": "git@github.com:brianwestphal/pueue-wait-cond.git",
+          "revisionId": "d40cfd9ad16f56af578e2be0779a77a24e36d0a0",
+          "branch": "main"
+        }
+      ]
+    }
+  ]
+}

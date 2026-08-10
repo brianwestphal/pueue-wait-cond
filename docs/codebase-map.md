@@ -123,8 +123,9 @@ declarations + source maps. Node ≥ 20. No runtime dependencies.
 | E2E (real) | `test/e2e/daemon.test.ts` | same | Starts its **own** `pueued` in a temp dir (own socket + state). Skips if pueue is missing — unless `PWC_REQUIRE_PUEUE=1`, which makes that a failure. |
 
 Coverage merges both suites into one report via `c8 --temp-directory
-.tmp-coverage` (see `package.json` `coverage:*` scripts). Currently ~99.7%
-statements / 100% functions; the residue is unreachable defensive guards.
+.tmp-coverage` (see `package.json` `coverage:*` scripts). Currently 99.76%
+statements / 98.09% branches / 100% functions; the residue is unreachable
+defensive guards.
 
 **CI** (`.github/workflows/ci.yml`) runs gates (lint/typecheck/build) once, then
 a 2×2 matrix of {ubuntu, macos} × Node {20, 22}, then a coverage job. pueue is

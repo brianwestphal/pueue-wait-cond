@@ -92,8 +92,9 @@ CI covers Linux and macOS; this section is what CI cannot reach.
 
 1. `npm pack --dry-run`.
 
-**Expected:** the tarball contains `bin/`, `dist/src/`, `README.md`, `LICENSE`
-and nothing else — no `test/`, no `src/*.ts`, no configs.
+**Expected:** the tarball contains `bin/`, `dist/src/`, `README.md`,
+`CHANGELOG.md`, `LICENSE` and nothing else — no `test/`, no `src/*.ts`, no
+configs.
 
 ## Automated coverage summary
 

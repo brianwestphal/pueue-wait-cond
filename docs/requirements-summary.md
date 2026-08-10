@@ -92,7 +92,7 @@ Status markers: **Shipped** · **Partial** · **Design only** · **Deferred**
 
 ## Test coverage
 
-Merged unit + E2E: **~99.7% statements, ~98% branches, 100% functions**. The
+Merged unit + E2E: **99.76% statements, 98.09% branches, 100% functions**. The
 uncovered residue is defensive guards that cannot be reached through the public
 surface (rethrow arms for errors the callee never raises, a best-effort temp-dir
 cleanup `catch`).

@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "Hot Sheet",
+          "rules": [
+            {
+              "id": "review-note",
+              "name": "ReviewNote",
+              "shortDescription": {
+                "text": "AI-authored, line-anchored review note."
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "review-note",
+          "ruleIndex": 0,
+          "kind": "informational",
+          "level": "none",
+          "guid": "msmjgin0pxook52j",
+          "message": {
+            "text": "The published-content contract now matches the actual npm allowlist and verified dry-run tarball: CHANGELOG.md is intentionally shipped alongside the binary, build output, README, and license.",
+            "markdown": "The published-content contract now matches the actual npm allowlist and verified dry-run tarball: `CHANGELOG.md` is intentionally shipped alongside the binary, build output, README, and license."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "docs/requirements/05-packaging.md"
+                },
+                "region": {
+                  "startLine": 49,
+                  "endLine": 51,
+                  "snippet": {
+                    "text": "\n`files` ships `bin/`, `dist/src/`, `README.md`, `CHANGELOG.md` and `LICENSE` —\nsources, tests and configs stay out of the tarball. `prepack` runs the build, so"
+                  }
+                }
+              }
+            }
+          ],
+          "properties": {
+            "tags": [
+              "proof"
+            ],
+            "ext-ai-tool-confidence": 1
+          },
+          "rank": 80,
+          "workItemUris": [
+            "PWC-15"
+          ],
+          "partialFingerprints": {
+            "prNoteAnchor/v1": "90fb1ba9ca42839b6479d814c9ec0e6c"
+          }
+        }
+      ],
+      "versionControlProvenance": [
+        {
+          "repositoryUri": "git@github.com:brianwestphal/pueue-wait-cond.git",
+          "revisionId": "d40cfd9ad16f56af578e2be0779a77a24e36d0a0",
+          "branch": "main"
+        }
+      ]
+    }
+  ]
+}
