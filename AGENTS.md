@@ -7,4 +7,5 @@
 - The skill adapters delegate to `.claude/skills/`, the canonical source for workflows shared across AI tools. When changing a shared workflow, edit the canonical file and keep the adapter metadata in sync.
 - Claude tool names in shared documents describe capabilities, not required product-specific tools — use this tool's equivalent file-search, shell, editing, or web capability.
 - Keep durable repository guidance in `CLAUDE.md`; provider-specific configuration belongs in its provider's directory.
+- In particular, follow `CLAUDE.md`'s **Git Workflow** section: commit each coherent, checked unit as work progresses while preserving unrelated user changes.
 <!-- hotsheet:end section=claude-adapter -->

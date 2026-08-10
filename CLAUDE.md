@@ -10,6 +10,16 @@ When the user gives you work directly (not via the Hot Sheet channel or events),
 - **Use FEEDBACK NEEDED before deferring or asking about follow-ups.** When about to (a) defer a ticket needing more work, (b) ask whether to file follow-ups, or (c) close with a question buried in notes — DON'T. Leave the ticket `started`, add a `FEEDBACK NEEDED:` note (per `.hotsheet/worklist.md`), signal channel done, and wait. It's the only reliable way to surface a question.
 <!-- hotsheet:end section=ticket-driven-work -->
 
+## Git Workflow
+
+- **Commit as you go.** When a coherent, reviewable unit of work is complete and
+  its relevant checks pass, commit it before starting the next unit. Use a clear,
+  scoped commit message and reference the Hot Sheet ticket when applicable.
+- Commit only files belonging to that unit. Preserve unrelated user changes and
+  never sweep them into a commit merely to obtain a clean working tree.
+- Do not leave completed work uncommitted at handoff unless the user explicitly
+  asks for an uncommitted diff. Never push without explicit permission.
+
 <!-- hotsheet:begin section=testing-philosophy v=2 -->
 ## Testing Philosophy
 
