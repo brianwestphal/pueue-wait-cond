@@ -1,6 +1,6 @@
 {
   "name": "pueue-wait-cond",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "pueue wait with timeouts and --until / --while script conditions",
   "keywords": [
     "pueue",

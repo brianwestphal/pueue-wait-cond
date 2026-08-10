@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.0 — 2026-08-10
+
+Getting more production ready
+
 Releases are cut with `npm run release` (see [docs/requirements/05-packaging.md](docs/requirements/05-packaging.md)),
 which prepends an entry here and tags `v{version}`. CI publishes from the tag.
 
