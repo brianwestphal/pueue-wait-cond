@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.1 — 2026-08-10
+
+Fixed CI issues
+
 ## 0.2.0 — 2026-08-10
 
 Getting more production ready
