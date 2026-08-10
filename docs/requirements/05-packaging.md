@@ -87,10 +87,39 @@ version + `CHANGELOG.md` → gates → commit → annotated tag → push.
 
 **The tag is the trigger.** No script publishes. Pushing `v*` starts
 `.github/workflows/release.yml`, which re-runs the gates, refuses a tag whose
-version disagrees with `package.json`, publishes to npm with `--provenance`
-under `latest` or `beta` depending on the tag shape, and opens a GitHub Release
-using the annotated tag's message as the body. The local gates are a fast fail,
-not the authority.
+version disagrees with `package.json`, publishes to npm under `latest` or `beta`
+depending on the tag shape, and opens a GitHub Release using the annotated tag's
+message as the body. The local gates are a fast fail, not the authority.
+
+### R5.6.4 — Publishing is via npm trusted publishing (OIDC)
+
+There is **no npm token anywhere** — no `NPM_TOKEN` secret, no `NODE_AUTH_TOKEN`.
+npm authenticates the publish from a short-lived OIDC token minted by GitHub.
+
+Three things have to agree, and a mismatch fails the publish *after* the tag has
+already been pushed:
+
+| Where | Value |
+| --- | --- |
+| npmjs.com → package → trusted publisher | repo `brianwestphal/pueue-wait-cond`, workflow `release.yml`, environment `npm-publish` |
+| `release.yml` job | `environment: npm-publish` |
+| `release.yml` permissions | `id-token: write` |
+
+So: renaming the workflow file, renaming the job's environment, or dropping
+`id-token: write` all break releases, and none of them look like they would.
+
+**The runner's bundled npm is too old.** Trusted publishing landed in npm
+**11.5.0**, and 11.5.1 fixed provenance defaulting for it; Node 22 bundles npm
+10.9.x and Node 20 bundles 10.8.x. The workflow therefore installs
+`npm@^11.5.1` explicitly before publishing. Without that step every gate passes
+and the publish fails at the very end.
+
+Provenance is automatic under trusted publishing. `--provenance` is still passed
+explicitly, as documentation of intent rather than because it is required.
+
+The `npm-publish` GitHub environment currently has **no protection rules**, so a
+pushed tag releases without further approval. Adding a required reviewer there
+would turn the tag push into a request rather than a release.
 
 ### R5.6.1 — Resumability
 

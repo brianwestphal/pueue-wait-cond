@@ -88,6 +88,7 @@ Status markers: **Shipped** · **Partial** · **Design only** · **Deferred**
 | R5.6.1 | Resumable via `.release-state.json` | Shipped |
 | R5.6.2 | `release:beta:auto` is a separate, stricter, non-interactive script | Shipped |
 | R5.6.3 | `-beta.N` picks the first free number; version files stay `X.Y.Z` | Shipped |
+| R5.6.4 | npm trusted publishing (OIDC), no token; runner npm upgraded to `^11.5.1` | **Partial** — configured on both sides, never exercised |
 
 ## Test coverage
 

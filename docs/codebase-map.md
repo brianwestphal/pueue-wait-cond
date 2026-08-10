@@ -41,7 +41,7 @@ any conflict — fix this file when it drifts.
 │   └── manual-test-plan.md
 ├── .github/
 │   ├── workflows/ci.yml         # lint+typecheck · test matrix · coverage
-│   ├── workflows/release.yml    # on v* tag: gates → npm publish → GitHub Release
+│   ├── workflows/release.yml    # on v* tag: gates → npm publish (OIDC) → GH Release
 │   └── scripts/install-pueue.sh # prebuilt pueue/pueued for the runner's platform
 ├── scripts/
 │   ├── release.sh               # interactive release; --beta for a prerelease

@@ -10,11 +10,15 @@ on:
 
 permissions:
   contents: write # create the GitHub Release
-  id-token: write # npm provenance
+  id-token: write # OIDC token for npm trusted publishing (and provenance)
 
 jobs:
   release:
     runs-on: ubuntu-latest
+    # Must match the environment configured on the npm side for trusted
+    # publishing. npm checks it as part of the OIDC claim, so renaming it here
+    # without renaming it there fails the publish.
+    environment: npm-publish
     steps:
       - uses: actions/checkout@v4
         with:
@@ -25,6 +29,14 @@ jobs:
           node-version: 22
           cache: npm
           registry-url: https://registry.npmjs.org
+
+      # Trusted publishing (OIDC) landed in npm 11.5.0, and 11.5.1 fixed
+      # provenance defaulting for it. Node 22 bundles npm 10.9.x and Node 20
+      # bundles 10.8.x, so the runner's npm is too old out of the box — without
+      # this the publish fails after every gate has already passed and the tag
+      # has already been pushed.
+      - name: Upgrade npm for trusted publishing
+        run: npm install -g npm@^11.5.1
 
       - run: npm ci
 
@@ -67,10 +79,14 @@ jobs:
             exit 1
           fi
 
-      - name: Publish to npm
-        run: npm publish --provenance --access public --tag "${{ steps.channel.outputs.dist_tag }}"
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # No NODE_AUTH_TOKEN: npm authenticates via the OIDC token minted from the
+      # `id-token: write` permission plus this job's `environment`. Provenance is
+      # automatic under trusted publishing; the flag is kept as documentation of
+      # the intent.
+      - name: Publish to npm (trusted publishing)
+        run: |
+          echo "npm $(npm --version)"
+          npm publish --provenance --access public --tag "${{ steps.channel.outputs.dist_tag }}"
 
       - name: Create the GitHub Release
         env:
