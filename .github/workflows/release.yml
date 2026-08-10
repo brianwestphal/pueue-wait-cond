@@ -1,0 +1,85 @@
+name: Release
+
+# Triggered by the tags scripts/release.sh pushes:
+#   v1.2.3          -> npm dist-tag "latest", normal GitHub Release
+#   v1.2.3-beta.4   -> npm dist-tag "beta",   GitHub prerelease
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write # create the GitHub Release
+  id-token: write # npm provenance
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # annotated tag message is the release body
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: https://registry.npmjs.org
+
+      - run: npm ci
+
+      - name: Install pueue
+        run: .github/scripts/install-pueue.sh
+
+      # The tag is cut locally, so re-run the gates here: this is the authority,
+      # not whatever happened on the release engineer's machine.
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run test:unit
+      - name: E2E (stub + real daemon)
+        run: npm run test:e2e
+        env:
+          PWC_REQUIRE_PUEUE: '1'
+
+      - name: Work out the channel
+        id: channel
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          version="${tag#v}"
+          if [[ "$version" == *-beta.* ]]; then
+            echo "dist_tag=beta"    >> "$GITHUB_OUTPUT"
+            echo "prerelease=true"  >> "$GITHUB_OUTPUT"
+          else
+            echo "dist_tag=latest"  >> "$GITHUB_OUTPUT"
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      # A tag whose version disagrees with package.json would publish something
+      # nobody asked for, so refuse rather than guess.
+      - name: Check the tag matches package.json
+        run: |
+          tagged="${{ steps.channel.outputs.version }}"
+          base="${tagged%%-beta.*}"
+          pkg="$(node -p "require('./package.json').version")"
+          if [[ "$base" != "$pkg" ]]; then
+            echo "::error::Tag ${GITHUB_REF_NAME} implies version ${base}, but package.json says ${pkg}."
+            exit 1
+          fi
+
+      - name: Publish to npm
+        run: npm publish --provenance --access public --tag "${{ steps.channel.outputs.dist_tag }}"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # The annotated tag's message is the release notes the engineer wrote.
+          git tag -l --format='%(contents)' "${GITHUB_REF_NAME}" > notes.md
+          [[ -s notes.md ]] || echo "See CHANGELOG.md." > notes.md
+          gh release create "${GITHUB_REF_NAME}" \
+            --title "${GITHUB_REF_NAME}" \
+            --notes-file notes.md \
+            ${{ steps.channel.outputs.prerelease == 'true' && '--prerelease' || '' }}

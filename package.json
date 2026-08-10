@@ -41,6 +41,7 @@
     "bin/",
     "dist/src/",
     "README.md",
+    "CHANGELOG.md",
     "LICENSE"
   ],
   "scripts": {
@@ -58,7 +59,10 @@
     "coverage:unit": "c8 --config .c8rc.json --temp-directory .tmp-coverage npm run test:unit",
     "coverage:e2e": "c8 --config .c8rc.json --temp-directory .tmp-coverage npm run test:e2e",
     "coverage:report": "c8 report --config .c8rc.json --temp-directory .tmp-coverage --reporter text --reporter lcov --reporter html",
-    "prepack": "npm run build"
+    "prepack": "npm run build",
+    "release": "bash scripts/release.sh",
+    "release:beta": "bash scripts/release.sh --beta",
+    "release:beta:auto": "bash scripts/release-beta-auto.sh"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",

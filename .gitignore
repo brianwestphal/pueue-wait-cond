@@ -9,3 +9,6 @@ coverage/
 # Hot Sheet's local working state: sqlite db, telemetry, multi-MB snapshots,
 # rolling backups, and secret.json (a live API secret). None of it is source.
 .hotsheet/
+
+# Release script progress (resumable state), never committed.
+.release-state.json
