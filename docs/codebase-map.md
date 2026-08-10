@@ -41,7 +41,12 @@ any conflict — fix this file when it drifts.
 │   └── manual-test-plan.md
 ├── .github/
 │   ├── workflows/ci.yml         # lint+typecheck · test matrix · coverage
+│   ├── workflows/release.yml    # on v* tag: gates → npm publish → GitHub Release
 │   └── scripts/install-pueue.sh # prebuilt pueue/pueued for the runner's platform
+├── scripts/
+│   ├── release.sh               # interactive release; --beta for a prerelease
+│   └── release-beta-auto.sh     # non-interactive beta, for automation
+├── CHANGELOG.md
 ├── package.json  tsconfig.json  tsconfig.build.json
 ├── eslint.config.js  .c8rc.json
 └── README.md  LICENSE
@@ -159,6 +164,7 @@ scripts additionally *receive* the `PUEUE_WAIT_*` variables listed in
 | CI / installing pueue on a runner | `.github/workflows/ci.yml`, `.github/scripts/install-pueue.sh` |
 | Starting a throwaway pueue daemon | `test/helpers/e2e.ts` `TestDaemon` |
 | Manual-only checks | [manual-test-plan.md](manual-test-plan.md) |
+| Cutting a release | `scripts/release.sh`, `.github/workflows/release.yml`, [requirements/05](requirements/05-packaging.md) R5.6 |
 
 ## Gotchas discovered the hard way
 

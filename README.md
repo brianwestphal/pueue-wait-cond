@@ -412,6 +412,20 @@ installed those tests **skip silently** — see [Installing pueue](#installing-p
 if you want them to actually run, or set `PWC_REQUIRE_PUEUE=1` to turn the skip
 into a failure.
 
+### Releasing
+
+```sh
+npm run release            # interactive stable release  -> tag v{version}
+npm run release:beta       # same, but                   -> tag v{version}-beta.N
+npm run release:beta:auto  # non-interactive beta, for automation
+```
+
+Nothing publishes locally. The scripts bump the version, prepend to
+`CHANGELOG.md`, run the gates, commit, and push an annotated `v*` tag;
+`.github/workflows/release.yml` takes it from there — re-running the gates,
+publishing to npm with provenance under `latest` or `beta`, and opening a GitHub
+Release. `npm run release` is resumable if you abort part-way.
+
 CI (`.github/workflows/ci.yml`) runs lint, typecheck and both suites on
 **ubuntu + macOS × Node 20 and 22**, plus a merged coverage job. It installs
 pueue from prebuilt release binaries via `.github/scripts/install-pueue.sh` and

@@ -71,3 +71,46 @@ test that fails if an export disappears.
 
 TypeScript runs in strict mode with `noUncheckedIndexedAccess` and
 `exactOptionalPropertyTypes`.
+
+## R5.6 — Releasing
+
+Three entry points, modelled on the same scripts in `~/Documents/{kerf,news}`:
+
+| Command | Effect |
+| --- | --- |
+| `npm run release` | Interactive stable release → tag `v{version}` |
+| `npm run release:beta` | Same, but tag `v{version}-beta.N` |
+| `npm run release:beta:auto` | Non-interactive beta, for automation |
+
+The flow is: preflight → release notes → version → summary/confirm → write
+version + `CHANGELOG.md` → gates → commit → annotated tag → push.
+
+**The tag is the trigger.** No script publishes. Pushing `v*` starts
+`.github/workflows/release.yml`, which re-runs the gates, refuses a tag whose
+version disagrees with `package.json`, publishes to npm with `--provenance`
+under `latest` or `beta` depending on the tag shape, and opens a GitHub Release
+using the annotated tag's message as the body. The local gates are a fast fail,
+not the authority.
+
+### R5.6.1 — Resumability
+
+`scripts/release.sh` records progress in `.release-state.json` (gitignored), so
+an abort part-way through resumes rather than re-asking. Steps are numbered and
+each is skipped when already past.
+
+### R5.6.2 — Why `release:beta:auto` is a separate script
+
+`release.sh` is a state machine with several `read`-driven branches whose
+correct answers depend on the saved state, so piping answers into it is brittle.
+`scripts/release-beta-auto.sh` re-implements only the beta path, and is stricter
+where a human is not present to judge: a dirty tree or a non-main branch is a
+hard failure rather than a prompt.
+
+It accepts `--version X.Y.Z` (or a bare positional), `--notes FILE` /
+`--notes-stdin`, `--skip-gates`, and `--dry-run`.
+
+### R5.6.3 — Beta numbering
+
+The `-beta.N` suffix is chosen by scanning existing tags for the first free `N`,
+so re-running after a failed push does not collide. The suffix lives on the
+**tag**; `package.json` always carries the clean `X.Y.Z`.

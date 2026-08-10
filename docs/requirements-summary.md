@@ -84,6 +84,10 @@ Status markers: **Shipped** · **Partial** · **Design only** · **Deferred**
 | R5.3 | `files` allowlist + `prepack` build | Shipped |
 | R5.4 | Typed programmatic API via `src/index.ts` | Shipped |
 | R5.5 | build / typecheck / lint / test / coverage scripts | Shipped |
+| R5.6 | `release` / `release:beta` / `release:beta:auto`; tag triggers CI publish | **Partial** — scripts and `release.yml` exist but have never run a real release |
+| R5.6.1 | Resumable via `.release-state.json` | Shipped |
+| R5.6.2 | `release:beta:auto` is a separate, stricter, non-interactive script | Shipped |
+| R5.6.3 | `-beta.N` picks the first free number; version files stay `X.Y.Z` | Shipped |
 
 ## Test coverage
 
