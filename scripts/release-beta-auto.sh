@@ -136,12 +136,12 @@ draft_notes() {
     anchor=$(git describe --tags --abbrev=0 --match 'v*' 2>/dev/null || echo "")
     range="HEAD"; [[ -n "$anchor" ]] && range="${anchor}..HEAD"
     info "Drafting notes from ${BOLD}${range}${RESET}"
-    NOTES=$(git log --no-merges --pretty=format:'- %s' "$range" 2>/dev/null || true)
+    NOTES=$(gitgist "$range" 2>/dev/null || true)
   fi
 
   if [[ -z "${NOTES//[[:space:]]/}" ]]; then
     NOTES="- Maintenance release (no user-facing changes recorded)."
-    warn "No commits found for the notes range; using a placeholder."
+    warn "GitGist returned no release notes; using a placeholder."
   fi
 }
 

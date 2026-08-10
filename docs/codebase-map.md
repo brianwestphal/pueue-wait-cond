@@ -44,8 +44,8 @@ any conflict — fix this file when it drifts.
 │   ├── workflows/release.yml    # on v* tag: gates → npm publish (OIDC) → GH Release
 │   └── scripts/install-pueue.sh # prebuilt pueue/pueued for the runner's platform
 ├── scripts/
-│   ├── release.sh               # interactive release; --beta for a prerelease
-│   └── release-beta-auto.sh     # non-interactive beta, for automation
+│   ├── release.sh               # interactive release; GitGist notes; --beta prerelease
+│   └── release-beta-auto.sh     # non-interactive beta with GitGist notes
 ├── CHANGELOG.md
 ├── package.json  tsconfig.json  tsconfig.build.json
 ├── eslint.config.js  .c8rc.json
@@ -63,6 +63,10 @@ any conflict — fix this file when it drifts.
 
 `run()` taking an injectable `createClient` is what makes the whole CLI testable
 in-process without a daemon.
+
+GitGist is a development dependency. `npm run commit:msg` drafts a commit message
+from the staged diff, while both release scripts draft changelog text from the
+applicable tag-to-HEAD range before the release is committed.
 
 ## Data model
 

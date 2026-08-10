@@ -15,8 +15,8 @@
 #     news also writes tauri.conf.json and Cargo.toml. Here it is package.json
 #     and package-lock.json, which `npm version` handles by itself.
 #
-#  2. NO gitgist. Those repos draft notes with an AI helper that is not a
-#     dependency here, so notes are pre-filled from `git log` and edited by hand.
+#  2. GITGIST DRAFTS RELEASE NOTES. It reads the tag-to-HEAD code diff so the
+#     initial changelog text reflects the actual change, not only commit subjects.
 #
 #  3. THE TAG IS THE TRIGGER. This script never publishes. Pushing v* starts
 #     .github/workflows/release.yml, which re-runs the gates and publishes to npm
@@ -140,11 +140,11 @@ step_release_notes() {
 
   local tmp; tmp=$(mktemp -t pwc-notes)
   {
-    git log --no-merges --pretty=format:'- %s' "$range" 2>/dev/null || true
+    gitgist "$range" 2>/dev/null || true
     echo ""
     echo ""
     echo "# Lines starting with # are ignored."
-    echo "# Edit the bullets above into user-facing release notes, then save."
+    echo "# Edit the GitGist draft above into user-facing release notes, then save."
   } > "$tmp"
 
   local editor; editor=$(resolve_editor)

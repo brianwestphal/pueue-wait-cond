@@ -411,6 +411,7 @@ npm test               # unit + E2E
 npm run coverage       # merged unit + E2E coverage → coverage/
 npm run lint
 npm run typecheck
+npm run commit:msg     # draft a commit message from the staged diff with GitGist
 ```
 
 The E2E suite starts its **own** `pueued` in a temp directory with its own
@@ -432,6 +433,10 @@ Nothing publishes locally. The scripts bump the version, prepend to
 `.github/workflows/release.yml` takes it from there — re-running the gates,
 publishing to npm with provenance under `latest` or `beta`, and opening a GitHub
 Release. `npm run release` is resumable if you abort part-way.
+
+GitGist drafts commit messages from the staged diff (`npm run commit:msg`) and
+drafts changelog entries from the release's tag-to-HEAD diff. Treat those drafts
+as editable starting points and review them before committing or publishing.
 
 CI (`.github/workflows/ci.yml`) runs lint, typecheck and both suites on
 **ubuntu + macOS × Node 20 and 22**, plus a merged coverage job. It installs

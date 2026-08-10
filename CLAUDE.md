@@ -19,6 +19,10 @@ When the user gives you work directly (not via the Hot Sheet channel or events),
   never sweep them into a commit merely to obtain a clean working tree.
 - Do not leave completed work uncommitted at handoff unless the user explicitly
   asks for an uncommitted diff. Never push without explicit permission.
+- Use GitGist to draft commit messages and changelog/release notes. Run
+  `npm run commit:msg` for the staged change, and let the release scripts call
+  `gitgist <last-tag>..HEAD` for diff-grounded changelog text. Review and edit
+  every generated draft before committing or publishing it.
 
 ## Language and Style
 
